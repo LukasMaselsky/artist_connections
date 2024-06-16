@@ -1,0 +1,157 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: black;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "font": {"color": "white"}, "id": "Michael da Vinci", "label": "Michael da Vinci", "shape": "dot", "size": 3}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Isaiah Rashad", "label": "Isaiah Rashad", "shape": "dot", "size": 44}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "YGTUT", "label": "YGTUT", "shape": "dot", "size": 3}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Jay Rock", "label": "Jay Rock", "shape": "dot", "size": 12}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "SZA", "label": "SZA", "shape": "dot", "size": 7}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Kendrick Lamar", "label": "Kendrick Lamar", "shape": "dot", "size": 13}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Zacari", "label": "Zacari", "shape": "dot", "size": 6}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Kal Banx", "label": "Kal Banx", "shape": "dot", "size": 2}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Kembe X", "label": "Kembe X", "shape": "dot", "size": 4}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "REASON", "label": "REASON", "shape": "dot", "size": 4}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Brian Cameron", "label": "Brian Cameron", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "ScHoolboy Q", "label": "ScHoolboy Q", "shape": "dot", "size": 12}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Anderson .Paak", "label": "Anderson .Paak", "shape": "dot", "size": 8}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Juicy J", "label": "Juicy J", "shape": "dot", "size": 6}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "SiR", "label": "SiR", "shape": "dot", "size": 9}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Lance Skiiiwalker", "label": "Lance Skiiiwalker", "shape": "dot", "size": 5}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Jean Deaux", "label": "Jean Deaux", "shape": "dot", "size": 5}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Smino", "label": "Smino", "shape": "dot", "size": 7}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Amazn", "label": "Amazn", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "EARTHGANG", "label": "EARTHGANG", "shape": "dot", "size": 3}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Genius", "label": "Genius", "shape": "dot", "size": 4}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Deacon Blue", "label": "Deacon Blue", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Kari Faux", "label": "Kari Faux", "shape": "dot", "size": 5}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Amindi", "label": "Amindi", "shape": "dot", "size": 2}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Syd", "label": "Syd", "shape": "dot", "size": 4}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Hugh Augustine", "label": "Hugh Augustine", "shape": "dot", "size": 2}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Lil Uzi Vert", "label": "Lil Uzi Vert", "shape": "dot", "size": 5}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Young Nudy", "label": "Young Nudy", "shape": "dot", "size": 7}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "GoldLink", "label": "GoldLink", "shape": "dot", "size": 3}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Deante\u0027 Hitchcock", "label": "Deante\u0027 Hitchcock", "shape": "dot", "size": 6}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Doechii", "label": "Doechii", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Duke Deuce", "label": "Duke Deuce", "shape": "dot", "size": 2}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "UMI", "label": "UMI", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Jay Worthy", "label": "Jay Worthy", "shape": "dot", "size": 1}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "6LACK", "label": "6LACK", "shape": "dot", "size": 5}, {"color": "#97c2fc", "font": {"color": "white"}, "id": "Project Pat", "label": "Project Pat", "shape": "dot", "size": 4}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "Michael da Vinci", "to": "Isaiah Rashad", "width": 5}, {"arrows": "to", "from": "Michael da Vinci", "to": "YGTUT", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Michael da Vinci", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Jay Rock", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "SZA", "width": 2}, {"arrows": "to", "from": "Isaiah Rashad", "to": "YGTUT", "width": 3}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Kendrick Lamar", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Zacari", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Kal Banx", "width": 1}, {"arrows": "to", "from": "Isaiah Rashad", "to": "Kembe X", "width": 2}, {"arrows": "to", "from": "Isaiah Rashad", "to": "REASON", "width": 5}, {"arrows": "to", "from": "Brian Cameron", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Jay Rock", "to": "Isaiah Rashad", "width": 3}, {"arrows": "to", "from": "Jay Rock", "to": "ScHoolboy Q", "width": 8}, {"arrows": "to", "from": "Jay Rock", "to": "Kendrick Lamar", "width": 20}, {"arrows": "to", "from": "Jay Rock", "to": "Anderson .Paak", "width": 2}, {"arrows": "to", "from": "Jay Rock", "to": "Kembe X", "width": 1}, {"arrows": "to", "from": "Jay Rock", "to": "Juicy J", "width": 1}, {"arrows": "to", "from": "ScHoolboy Q", "to": "Isaiah Rashad", "width": 2}, {"arrows": "to", "from": "ScHoolboy Q", "to": "Jay Rock", "width": 2}, {"arrows": "to", "from": "ScHoolboy Q", "to": "SiR", "width": 1}, {"arrows": "to", "from": "ScHoolboy Q", "to": "Kendrick Lamar", "width": 7}, {"arrows": "to", "from": "ScHoolboy Q", "to": "Lance Skiiiwalker", "width": 1}, {"arrows": "to", "from": "ScHoolboy Q", "to": "Anderson .Paak", "width": 3}, {"arrows": "to", "from": "SZA", "to": "Isaiah Rashad", "width": 5}, {"arrows": "to", "from": "SZA", "to": "Jay Rock", "width": 2}, {"arrows": "to", "from": "SZA", "to": "ScHoolboy Q", "width": 3}, {"arrows": "to", "from": "SZA", "to": "Jean Deaux", "width": 1}, {"arrows": "to", "from": "SZA", "to": "Kendrick Lamar", "width": 3}, {"arrows": "to", "from": "Jean Deaux", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Jean Deaux", "to": "Smino", "width": 3}, {"arrows": "to", "from": "YGTUT", "to": "Isaiah Rashad", "width": 3}, {"arrows": "to", "from": "Amazn", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "SiR", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "SiR", "to": "Jay Rock", "width": 1}, {"arrows": "to", "from": "SiR", "to": "EARTHGANG", "width": 1}, {"arrows": "to", "from": "SiR", "to": "Anderson .Paak", "width": 1}, {"arrows": "to", "from": "Kendrick Lamar", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Kendrick Lamar", "to": "Jay Rock", "width": 38}, {"arrows": "to", "from": "Kendrick Lamar", "to": "ScHoolboy Q", "width": 11}, {"arrows": "to", "from": "Kendrick Lamar", "to": "SZA", "width": 2}, {"arrows": "to", "from": "Kendrick Lamar", "to": "SiR", "width": 1}, {"arrows": "to", "from": "Kendrick Lamar", "to": "Genius", "width": 2}, {"arrows": "to", "from": "Kendrick Lamar", "to": "Anderson .Paak", "width": 1}, {"arrows": "to", "from": "Zacari", "to": "Isaiah Rashad", "width": 2}, {"arrows": "to", "from": "Zacari", "to": "SiR", "width": 1}, {"arrows": "to", "from": "Zacari", "to": "Kendrick Lamar", "width": 1}, {"arrows": "to", "from": "Zacari", "to": "Kembe X", "width": 3}, {"arrows": "to", "from": "Zacari", "to": "REASON", "width": 1}, {"arrows": "to", "from": "Deacon Blue", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Kari Faux", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Kari Faux", "to": "Jean Deaux", "width": 1}, {"arrows": "to", "from": "Kari Faux", "to": "Amindi", "width": 1}, {"arrows": "to", "from": "Syd", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Syd", "to": "Hugh Augustine", "width": 1}, {"arrows": "to", "from": "Syd", "to": "Lil Uzi Vert", "width": 1}, {"arrows": "to", "from": "Hugh Augustine", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Lance Skiiiwalker", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Lance Skiiiwalker", "to": "Jay Rock", "width": 3}, {"arrows": "to", "from": "Lance Skiiiwalker", "to": "ScHoolboy Q", "width": 2}, {"arrows": "to", "from": "Lance Skiiiwalker", "to": "Kendrick Lamar", "width": 1}, {"arrows": "to", "from": "Genius", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Genius", "to": "Smino", "width": 1}, {"arrows": "to", "from": "Lil Uzi Vert", "to": "Isaiah Rashad", "width": 2}, {"arrows": "to", "from": "Lil Uzi Vert", "to": "Genius", "width": 1}, {"arrows": "to", "from": "Lil Uzi Vert", "to": "Young Nudy", "width": 1}, {"arrows": "to", "from": "EARTHGANG", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Anderson .Paak", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Anderson .Paak", "to": "ScHoolboy Q", "width": 2}, {"arrows": "to", "from": "Anderson .Paak", "to": "SiR", "width": 2}, {"arrows": "to", "from": "Anderson .Paak", "to": "GoldLink", "width": 2}, {"arrows": "to", "from": "GoldLink", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "GoldLink", "to": "Deante\u0027 Hitchcock", "width": 1}, {"arrows": "to", "from": "Smino", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Smino", "to": "Jean Deaux", "width": 1}, {"arrows": "to", "from": "Smino", "to": "SiR", "width": 1}, {"arrows": "to", "from": "Smino", "to": "Kari Faux", "width": 1}, {"arrows": "to", "from": "Smino", "to": "EARTHGANG", "width": 1}, {"arrows": "to", "from": "Kal Banx", "to": "Isaiah Rashad", "width": 2}, {"arrows": "to", "from": "Doechii", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Duke Deuce", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Kembe X", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "REASON", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "REASON", "to": "Deante\u0027 Hitchcock", "width": 1}, {"arrows": "to", "from": "UMI", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Deante\u0027 Hitchcock", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Deante\u0027 Hitchcock", "to": "Kari Faux", "width": 1}, {"arrows": "to", "from": "Amindi", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Jay Worthy", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "6LACK", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "6LACK", "to": "ScHoolboy Q", "width": 1}, {"arrows": "to", "from": "6LACK", "to": "Syd", "width": 1}, {"arrows": "to", "from": "6LACK", "to": "Deante\u0027 Hitchcock", "width": 2}, {"arrows": "to", "from": "6LACK", "to": "Young Nudy", "width": 1}, {"arrows": "to", "from": "Project Pat", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Project Pat", "to": "Duke Deuce", "width": 1}, {"arrows": "to", "from": "Project Pat", "to": "Juicy J", "width": 37}, {"arrows": "to", "from": "Juicy J", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Juicy J", "to": "Project Pat", "width": 28}, {"arrows": "to", "from": "Juicy J", "to": "Young Nudy", "width": 1}, {"arrows": "to", "from": "Young Nudy", "to": "Isaiah Rashad", "width": 1}, {"arrows": "to", "from": "Young Nudy", "to": "Lil Uzi Vert", "width": 1}, {"arrows": "to", "from": "Young Nudy", "to": "Deante\u0027 Hitchcock", "width": 1}, {"arrows": "to", "from": "Young Nudy", "to": "Juicy J", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+                    network.on("click", neighbourhoodHighlight);
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

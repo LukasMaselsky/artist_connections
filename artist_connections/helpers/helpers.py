@@ -1,5 +1,5 @@
 from typing import List
-from artist_connections.datatypes.datatypes import EdgesJSON
+from artist_connections.datatypes.datatypes import EdgesJSON, NodesJSON
 import json
 
 def parse_features(s: str) -> List[str]:
@@ -23,6 +23,14 @@ def load_edges_json(path: str) -> EdgesJSON | None:
     try:
         with open(path) as f:
             data: EdgesJSON = json.load(f)
+        return data
+    except Exception as e:
+        return None
+    
+def load_nodes_json(path: str) -> List[str] | None:
+    try:
+        with open(path) as f:
+            data: NodesJSON = json.load(f)
         return data
     except Exception as e:
         return None
