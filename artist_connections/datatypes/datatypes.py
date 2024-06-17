@@ -3,6 +3,8 @@ from typing import List, Tuple, TypedDict
 type EdgesJSON = dict[str, dict[str, int]]
 type NodesJSON = List[str]
 
+type Edges = List[Tuple[str, str, int]]
+
 class Edge(TypedDict):
     source: str
     target: str
@@ -14,4 +16,4 @@ class Graph(TypedDict):
 
 class GraphNetworkX(TypedDict):
     nodes: List[str]
-    edges: List[Tuple[str, str, int]]
+    edges: Edges
