@@ -2,6 +2,18 @@ from typing import List
 from artist_connections.datatypes.datatypes import EdgesJSON, NodesJSON
 import json
 
+def rgba_to_hex(r: int, g: int, b: int, a: float):
+    if r < 0 or r > 255:
+        raise ValueError("r value must be in between 0 and 255")
+    if g < 0 or g > 255:
+        raise ValueError("g value must be in between 0 and 255")
+    if b < 0 or b > 255:
+        raise ValueError("b value must be in between 0 and 255")
+    if a < 0.0 or a > 1.0:
+        raise ValueError("a value must be in between 0 and 1")
+
+    return '#{:02x}{:02x}{:02x}{:02x}'.format(r, g, b, int(255 * a))
+
 def parse_features(s: str) -> List[str]:
     if len(s) == 2:
         # no features

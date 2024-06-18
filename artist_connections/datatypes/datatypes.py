@@ -4,6 +4,7 @@ type EdgesJSON = dict[str, dict[str, int]]
 type NodesJSON = List[str]
 
 type Edges = List[Tuple[str, str, int]]
+type Connections = dict[str, int]
 
 class Edge(TypedDict):
     source: str

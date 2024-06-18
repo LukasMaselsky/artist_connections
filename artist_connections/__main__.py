@@ -1,14 +1,19 @@
-from artist_connections.datatypes.datatypes import Edges, EdgesJSON
-from artist_connections.helpers.helpers import load_edges_json
+from artist_connections.datatypes.datatypes import Edges, EdgesJSON, Connections
+from artist_connections.helpers.helpers import load_edges_json, rgba_to_hex
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from difflib import get_close_matches
 from pyvis.network import Network
 import time
 import sys
 import igraph as ig
+from collections import defaultdict
 
 #* run with 'python -m artist_connections'
+
+def normalise(str: str):
+    return str.encode("ascii", "ignore").decode()
 
 def search(edges_json: EdgesJSON, query: str) -> str | None:
     if query in edges_json:
@@ -28,12 +33,12 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
     nodes.add(query)
     # all incoming nodes to {query}
     for key in edges_json[query].keys():
-        nodes.add(key.encode("ascii", "ignore").decode())
+        nodes.add(normalise(key))
 
     # all outgoing nodes to {query}
     for artist, features in edges_json.items():
         if query in features:
-            nodes.add(artist.encode("ascii", "ignore").decode())
+            nodes.add(normalise(artist))
        
                 
     for node in nodes:
@@ -53,25 +58,46 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
 def create_full_graph(edges_json: EdgesJSON) -> Edges:
     edges: Edges = []
     for artist, features in edges_json.items():
-        artist = artist.encode("ascii", "ignore").decode()
+        artist = normalise(artist)
         for key, value in features.items():
-            key = key.encode("ascii", "ignore").decode()
+            key = normalise(key)
             edges.append((key, artist, value))
     return edges
 
-def show_igraph(edges: Edges):
+def show_igraph(edges: Edges, full_graph=False):
     G = ig.Graph()
     G = G.TupleList(edges, directed=True, weights=True)
-    
     fig, ax = plt.subplots()
     
-    layout = G.layout("kamada_kawai")
-    ig.plot(G, layout=layout, target=ax)
+    fig.patch.set_facecolor((0, 0, 0))
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    ax.set_facecolor((0, 0, 0))
+
+    visual_style = {}
+    visual_style["vertex_label"] = G.vs["name"]
+    visual_style["vertex_label_color"] = "white"
+    visual_style["vertex_color"] = "skyblue"
+    visual_style["vertex_size"] = [degree for degree in G.vs.degree()]
+    visual_style["vertex_label_dist"] = 0.6
+    visual_style["edge_color"] = rgba_to_hex(58, 201, 255, 0.3)
+    visual_style["edge_width"] = G.es["weight"]
+
+    layout = G.layout("kamada_kawai" if not full_graph else "lgl")
+    ig.plot(G, layout=layout, target=ax, **visual_style)
     plt.show()
    
+def calculate_connections(edges_json: EdgesJSON) -> Connections:
+    connections: Connections = defaultdict(int)
+    for artist, features in edges_json.items():
+        artist = normalise(artist)
+        connections[artist] += sum(features.values())
+        for key, value in features.items():
+            connections[key] += value
+    
+    return dict(sorted(connections.items(), key=lambda x: x[1], reverse=True))
 
 
-def show_graph(edges: Edges):
+def show_graph(edges: Edges) -> None:
     G = nx.DiGraph()
     G.add_weighted_edges_from(edges)
     pos = nx.spring_layout(G, k=2)
@@ -105,10 +131,28 @@ def main():
     #graph = create_full_graph(edges_data)
     print("--- %s seconds --- to create graph" % (time.time() - point2))
     point3 = time.time()
-    #show_graph(graph)
+
     show_igraph(graph)
     print("--- %s seconds --- to show graph" % (time.time() - point3))
     
+def test():
+    start_time = time.time()
+    
+    edges_data = load_edges_json("data/edges.json")
+    print("--- %s seconds --- to load df" % (time.time() - start_time))
+    point = time.time()
+    if edges_data is None:
+        raise ValueError("Data is None")
+    connections = calculate_connections(edges_data)
+    print("--- %s seconds --- to create connections" % (time.time() - point))
+    print(len(connections))
+    counter = 0
+    for k, v in connections.items():
+        print(k, v)
+        counter += 1
+        if counter == 100:
+            break
+
 
 if __name__ == "__main__":
     main()
