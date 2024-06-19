@@ -1,9 +1,9 @@
-from typing import List, Tuple, TypedDict
+from typing import Tuple, TypedDict
 
 type EdgesJSON = dict[str, dict[str, int]]
-type NodesJSON = List[str]
+type NodesJSON = list[str]
 
-type Edges = List[Tuple[str, str, int]]
+type Edges = list[Tuple[str, str, int]]
 type Connections = dict[str, int]
 
 class Edge(TypedDict):
@@ -12,9 +12,9 @@ class Edge(TypedDict):
     weight: int
 
 class Graph(TypedDict):
-    nodes: List[str]
-    edges: List[Edge]
+    nodes: list[str]
+    edges: list[Edge]
 
 class GraphNetworkX(TypedDict):
-    nodes: List[str]
+    nodes: list[str]
     edges: Edges

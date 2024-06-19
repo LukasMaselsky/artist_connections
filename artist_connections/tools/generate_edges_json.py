@@ -1,8 +1,7 @@
 import polars as pl
 import time
-import json
 from artist_connections.datatypes.datatypes import EdgesJSON
-from artist_connections.helpers.helpers import parse_features
+from artist_connections.helpers.helpers import parse_features, write_to_json, process_non_english
 from difflib import get_close_matches, SequenceMatcher
 
 
@@ -21,7 +20,6 @@ def main(start_time: float) -> None:
         artist: str = row[0]
         features = parse_features(row[1])
         
-        
         if artist not in data:
             data[artist] = {}
 
@@ -30,7 +28,8 @@ def main(start_time: float) -> None:
             continue
         
         for feature in features:
-            if SequenceMatcher(None, feature, artist).ratio() > 0.9:
+            # prevents artist being featured on their own song recorded as an actual feature
+            if SequenceMatcher(None, feature, artist).ratio() > 0.9: 
                 continue
 
             if feature in data[artist]:
@@ -38,8 +37,7 @@ def main(start_time: float) -> None:
             else:
                 data[artist][feature] = 1
     
-    with open("data/edges.json", "w") as outfile:
-        json.dump(data, outfile)
+    write_to_json(data, "data/edges_3.json")
         
 
 

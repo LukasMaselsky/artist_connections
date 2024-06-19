@@ -1,14 +1,14 @@
 from artist_connections.datatypes.datatypes import Edges, EdgesJSON, Connections
-from artist_connections.helpers.helpers import load_edges_json, rgba_to_hex
+from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from difflib import get_close_matches
 from pyvis.network import Network
 import time
-import sys
 import igraph as ig
 from collections import defaultdict
+import json
 
 #* run with 'python -m artist_connections'
 
@@ -33,12 +33,12 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
     nodes.add(query)
     # all incoming nodes to {query}
     for key in edges_json[query].keys():
-        nodes.add(normalise(key))
+        nodes.add(key)
 
     # all outgoing nodes to {query}
     for artist, features in edges_json.items():
         if query in features:
-            nodes.add(normalise(artist))
+            nodes.add(artist)
        
                 
     for node in nodes:
@@ -58,9 +58,7 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
 def create_full_graph(edges_json: EdgesJSON) -> Edges:
     edges: Edges = []
     for artist, features in edges_json.items():
-        artist = normalise(artist)
         for key, value in features.items():
-            key = normalise(key)
             edges.append((key, artist, value))
     return edges
 
@@ -77,26 +75,36 @@ def show_igraph(edges: Edges, full_graph=False):
     visual_style["vertex_label"] = G.vs["name"]
     visual_style["vertex_label_color"] = "white"
     visual_style["vertex_color"] = "skyblue"
-    visual_style["vertex_size"] = [degree for degree in G.vs.degree()]
+    visual_style["vertex_size"] = [degree * 10 for degree in G.vs.degree()]
+    visual_style["vertex_label_size"] = 8
     visual_style["vertex_label_dist"] = 0.6
     visual_style["edge_color"] = rgba_to_hex(58, 201, 255, 0.3)
     visual_style["edge_width"] = G.es["weight"]
+    arrow_size = [weight * 3 for weight in G.es["weight"]]
+    visual_style["edge_arrow_size"], visual_style["edge_arrow_width"] = arrow_size, arrow_size
 
     layout = G.layout("kamada_kawai" if not full_graph else "lgl")
     ig.plot(G, layout=layout, target=ax, **visual_style)
     plt.show()
    
 def calculate_connections(edges_json: EdgesJSON) -> Connections:
+    filter_list = load_filter_list_json("data/filter_list.json")
+    if filter_list is None:
+        raise ValueError("Filter list is None")
+    
+
     connections: Connections = defaultdict(int)
     for artist, features in edges_json.items():
-        artist = normalise(artist)
-        connections[artist] += sum(features.values())
+        if not should_filter(artist, filter_list):
+            connections[artist] += sum(features.values())
+
         for key, value in features.items():
-            connections[key] += value
+            if not should_filter(key, filter_list):
+                connections[key] += value
     
     return dict(sorted(connections.items(), key=lambda x: x[1], reverse=True))
 
-
+'''
 def show_graph(edges: Edges) -> None:
     G = nx.DiGraph()
     G.add_weighted_edges_from(edges)
@@ -111,6 +119,7 @@ def show_graph(edges: Edges) -> None:
     net = Network(width="100%", height="800px", bgcolor="black", directed=True, font_color="white", neighborhood_highlight=True) # type: ignore
     net.from_nx(G)
     net.show("graph.html", notebook=False)
+'''
     
 def main():
     start_time = time.time()
@@ -138,7 +147,7 @@ def main():
 def test():
     start_time = time.time()
     
-    edges_data = load_edges_json("data/edges.json")
+    edges_data = load_edges_json("data/edges_2.json")
     print("--- %s seconds --- to load df" % (time.time() - start_time))
     point = time.time()
     if edges_data is None:
@@ -148,11 +157,11 @@ def test():
     print(len(connections))
     counter = 0
     for k, v in connections.items():
-        print(k, v)
+        if k.startswith(" ") and "(" in k and ")" in k:
+            print(k, v)
         counter += 1
-        if counter == 100:
-            break
+        
 
 
 if __name__ == "__main__":
-    main()
+    test()
