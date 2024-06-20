@@ -157,9 +157,11 @@ def test():
     print(len(connections))
     counter = 0
     for k, v in connections.items():
-        if k.startswith(" ") and "(" in k and ")" in k:
+        if "(" in k and ")" in k:
             print(k, v)
-        counter += 1
+            counter += 1
+        #if counter > 500:
+            #break
         
 
 

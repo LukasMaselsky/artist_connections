@@ -18,12 +18,6 @@ def should_filter(s: str, filter_list: list[str]) -> bool:
         return True
     return False
 
-def process_non_english(name: str):
-    '''
-    Format of types of string to be processed: "   (ascii thing)"
-    This means that its part of a
-    '''
-    return
 
 def parse_features(s: str) -> list[str]:
     if len(s) == 2:
