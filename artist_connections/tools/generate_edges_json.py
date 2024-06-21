@@ -58,7 +58,7 @@ def main(start_time: float) -> None:
             data[artist] = {}
 
         for feature in features:
-            # prevents artist being featured on their own song recorded as an actual feature
+            # prevents artist being "featured" on their own song recorded as an actual feature
             if SequenceMatcher(None, feature, artist).ratio() > 0.9: 
                 continue
 

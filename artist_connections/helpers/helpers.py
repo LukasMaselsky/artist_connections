@@ -1,7 +1,7 @@
 from artist_connections.datatypes.datatypes import EdgesJSON, NodesJSON
 import json
 
-def rgba_to_hex(r: int, g: int, b: int, a: float):
+def rgba_to_hex(r: int, g: int, b: int, a: float = 1):
     if r < 0 or r > 255:
         raise ValueError("r value must be in between 0 and 255")
     if g < 0 or g > 255:
