@@ -18,31 +18,10 @@ def should_filter(s: str, filter_list: list[str]) -> bool:
         return True
     return False
 
-
-def parse_features(s: str) -> list[str]:
-    if len(s) == 2:
-        # no features
-        return []
-
-    strings = []
-    if s.startswith('{') and s.endswith('}'):
-        s = s[1:-1]
-        for item in s.split(","):
-            decoded_s = item
-            if decoded_s.startswith('"') and decoded_s.endswith('"'):
-                decoded_s = decoded_s[1:-1]    
-            decoded_s = decoded_s.replace("\\\\'", "'")
-            decoded_s = decoded_s.replace('\\\\\\"', '"')
-            decoded_s = decoded_s.replace("\\\\$", "$")
-            decoded_s = decoded_s.replace("\\\\`", "`")
-            strings.append(decoded_s)
-        return strings
-    return []
-
 def load_edges_json(path: str) -> EdgesJSON | None:
     try:
         with open(path, encoding="utf-8") as f:
-            data: EdgesJSON = json.load(f)
+            data = json.load(f)
         return data
     except Exception as e:
         return None

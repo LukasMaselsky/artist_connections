@@ -1,10 +1,17 @@
 from typing import TypedDict
+from collections import defaultdict
 
-type EdgesJSON = dict[str, dict[str, int]]
+type EdgesJSON = dict[str, ArtistData]
 type NodesJSON = list[str]
 
 type Edges = list[tuple[str, str, int]]
 type Connections = dict[str, Array]
+
+class ArtistData(TypedDict):
+    features: defaultdict[str, int]
+    genres: defaultdict[str, int]
+    feat_songs: int
+    solo_songs: int
 
 class Array():
     def __init__(self, size: int, default_val: int = 0):
@@ -19,15 +26,6 @@ class Array():
 
     def __repr__(self):
         return repr(self.data)
-
-class Edge(TypedDict):
-    source: str
-    target: str
-    weight: int
-
-class Graph(TypedDict):
-    nodes: list[str]
-    edges: list[Edge]
 
 class GraphNetworkX(TypedDict):
     nodes: list[str]
