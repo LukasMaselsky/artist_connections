@@ -1,10 +1,9 @@
 from artist_connections.datatypes.datatypes import Edges, EdgesJSON
-from artist_connections.helpers.helpers import load_edges_json, rgba_to_hex
+from artist_connections.helpers.helpers import load_edges_json, rgba_to_hex, timing
 import networkx as nx
 import matplotlib.pyplot as plt
 from difflib import get_close_matches
 from pyvis.network import Network
-import time
 import igraph as ig
 
 
@@ -23,14 +22,14 @@ def search(edges_json: EdgesJSON, query: str) -> str | None:
     
     return None
     
-
+@timing
 def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
-    nodes = set()
+    nodes: set[str] = set()
     edges: Edges = []
 
     nodes.add(query)
     # all incoming nodes to {query}
-    for key in edges_json[query].keys():
+    for key in edges_json[query]["features"].keys():
         nodes.add(key)
 
     # all outgoing nodes to {query}
@@ -46,20 +45,23 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
             # * node should salways still exist in nodes_json if generated using edges_json in other script
             continue
             
-        for key, value in edges_json[node].items():
+        for key, value in edges_json[node]["features"].items():
             if key in nodes:
                 new_edge = (key, node, value)
                 edges.append(new_edge)
 
     return edges
 
+@timing
 def create_full_graph(edges_json: EdgesJSON) -> Edges:
     edges: Edges = []
-    for artist, features in edges_json.items():
+    for artist, data in edges_json.items():
+        features = data["features"]
         for key, value in features.items():
             edges.append((key, artist, value))
     return edges
 
+@timing
 def show_igraph(edges: Edges, full_graph=False):
     G = ig.Graph()
     G = G.TupleList(edges, directed=True, weights=True)
@@ -103,27 +105,21 @@ def show_graph(edges: Edges) -> None:
 '''
     
 def main():
-    start_time = time.time()
-    
+  
     query: str = "JMSN"
     edges_data = load_edges_json("data/edges.json")
-    print("--- %s seconds --- to load df" % (time.time() - start_time))
-    point = time.time()
+
     if edges_data is None:
         raise ValueError("Data is None")
 
     validated_query = search(edges_data, query)
-    print("--- %s seconds --- to search" % (time.time() - point))
-    point2 = time.time()
+    
     if validated_query is None:
         raise ValueError("Search query invalid, check your spelling")
     graph = create_singular_graph(edges_data, validated_query)
     #graph = create_full_graph(edges_data)
-    print("--- %s seconds --- to create graph" % (time.time() - point2))
-    point3 = time.time()
-
+   
     show_igraph(graph)
-    print("--- %s seconds --- to show graph" % (time.time() - point3))
     
         
 

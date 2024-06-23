@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import EdgesJSON, Connections, Array
-from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter
+from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter, timing
 import matplotlib.pyplot as plt
 import time
 from collections import defaultdict
@@ -7,6 +7,7 @@ import seaborn as sns
 import polars as pl
 import itertools
 
+@timing
 def create_connections(edges_json: EdgesJSON) -> Connections:
     filter_list = load_filter_list_json("data/filter_list.json")
     if filter_list is None:
@@ -35,6 +36,7 @@ def set_font_color(ax, color):
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_color(color)  # Tick labels
 
+@timing
 def show_connections_graph(connections: Connections, limit: int):
     tuples = list(connections.items())[:limit]
     data = [[(x, "Features received", y[0]), (x, "Features given", y[1])] for x, y in tuples]
@@ -68,20 +70,13 @@ def show_connections_graph(connections: Connections, limit: int):
     plt.subplots_adjust(top=0.85)
     plt.show()
 
-
-
 def main():
-    start_time = time.time()
-
     edges_data = load_edges_json("data/edges.json")
-    print("--- %s seconds --- to load df" % (time.time() - start_time))
-    point = time.time()
     if edges_data is None:
         raise ValueError("Data is None")
    
     connections = create_connections(edges_data)
-    print("--- %s seconds --- to create connections" % (time.time() - point))
-    
+
     show_connections_graph(connections, 30)
     counter = 0
     for k, v in connections.items():

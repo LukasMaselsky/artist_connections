@@ -34,14 +34,39 @@ def parse_features(s: str) -> list[str]:
         return strings
     return []
 
-def process_non_english(artist: str, features: list[str], custom_list: list[str]) -> tuple[str, bool]:
+def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     '''
     Format of types of string to be processed:  (dima bamberg),"{""дима бамберг (dima bamberg)""}"
     Unicode version will always be in features (I think, haven't checked)
     If this format found, always store feature as the artist name, ascii version should be discarded
+    Also things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}
     '''
     if artist in custom_list:
-        return features[0], True
+        return features[0]
+    
+    if len(features) == 1:
+        feature = features[0]
+        if feature == artist:
+            features.remove(feature)
+            return feature
+
+    for feature in features:
+        if artist == feature.encode("ascii", "ignore").decode():
+            features.remove(feature)
+            return feature
+        if " /" in feature:
+            if artist == feature.replace(" /", ","):
+                features.remove(feature)
+                return artist
+        if " / " in feature:
+            if artist == feature.replace(" / ", ","):
+                features.remove(feature)
+                return artist
+        if u"\u00a0" in feature:
+            if artist == feature.replace(u"\u00a0", " "):
+                features.remove(feature)
+                return artist
+        
 
     if "(" in artist and ")" in artist:
         for feature in features:
@@ -52,12 +77,14 @@ def process_non_english(artist: str, features: list[str], custom_list: list[str]
             artist_inside = (artist.split("("))[1].split(")")[0]
 
             if artist_inside == "" or artist_inside.isspace(): # handle: "artist name ... ()" format
-                return feature, True
+                features.remove(feature)
+                return feature
 
             if SequenceMatcher(None, feature_inside, artist_inside).ratio() > 0.7:
-                return feature, True
+                features.remove(feature)
+                return feature
 
-    return artist, False
+    return artist
         
 def main(start_time: float) -> None:
     df = pl.read_csv(r"data/song_lyrics_modified.csv")
@@ -71,7 +98,7 @@ def main(start_time: float) -> None:
 
     for row in df.iter_rows():
         features: list[str] = parse_features(row[1])
-        artist, was_updated = process_non_english(row[0], features, custom_list)
+        artist = process(row[0], features, custom_list)
 
         if artist not in data:
             data[artist] = {
@@ -81,7 +108,7 @@ def main(start_time: float) -> None:
                 "solo_songs": 0
             }
 
-        if len(features) == 0 or (was_updated and len(features) == 1):
+        if len(features) == 0:
             data[artist]["solo_songs"] += 1
         else:
             # prevents artist being "featured" on their own song recorded as an actual feature
@@ -96,14 +123,14 @@ def main(start_time: float) -> None:
 
         for feature in features:
             # prevents artist being "featured" on their own song recorded as an actual feature
-            if SequenceMatcher(None, feature, artist).ratio() > 0.9: 
+            if SequenceMatcher(None, feature, artist).ratio() > 0.7: 
                 continue
 
             data[artist]["features"][feature] += 1
             
             
     
-    write_to_json(data, "data/edges.json")
+    write_to_json(data, "data/edges_2.json")
         
 
 

@@ -1,5 +1,17 @@
 from artist_connections.datatypes.datatypes import EdgesJSON, NodesJSON
 import json
+from functools import wraps
+import time
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time.time()
+        result = f(*args, **kw)
+        te = time.time()
+        print(f'Function {f.__name__} took {te-ts:2.4f} seconds\n')
+        return result
+    return wrap
 
 def rgba_to_hex(r: int, g: int, b: int, a: float = 1):
     if r < 0 or r > 255:
@@ -18,6 +30,7 @@ def should_filter(s: str, filter_list: list[str]) -> bool:
         return True
     return False
 
+@timing
 def load_edges_json(path: str) -> EdgesJSON | None:
     try:
         with open(path, encoding="utf-8") as f:
@@ -25,7 +38,8 @@ def load_edges_json(path: str) -> EdgesJSON | None:
         return data
     except Exception as e:
         return None
-    
+
+@timing
 def load_nodes_json(path: str) -> list[str] | None:
     try:
         with open(path) as f:
@@ -34,6 +48,7 @@ def load_nodes_json(path: str) -> list[str] | None:
     except Exception as e:
         return None
     
+@timing
 def load_filter_list_json(path: str) -> list[str] | None:
     try:
         with open(path, encoding="utf-8") as f:
@@ -41,8 +56,8 @@ def load_filter_list_json(path: str) -> list[str] | None:
         return data
     except Exception as e:
         return None
-    
+
+@timing
 def write_to_json(data, path: str) -> None:
     with open(path, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, ensure_ascii=False)
-
