@@ -43,7 +43,7 @@ def show_scatter_plot(edges_json: EdgesJSON, limit: int, dark: bool = False):
     plt.show()
 
 def main():
-    edges_data = load_edges_json("data/edges_2.json")
+    edges_data = load_edges_json("data/edges.json")
     if edges_data is None:
         raise ValueError("Data is None")
     
@@ -56,11 +56,12 @@ def main():
     
     count = 0
     for k, v in filtered_edges.items():
-        if v["solo_songs"] < 1:
+        if v["solo_songs"] < 1 and v["feat_songs"] > 10:
             count += 1
             print(k, v["feat_songs"], v["solo_songs"])
         if count > 50:
             break
+    print(count)
     
     #show_scatter_plot(filtered_edges, 1000)
 

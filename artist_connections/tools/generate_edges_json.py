@@ -1,7 +1,7 @@
 import polars as pl
 import time
 from artist_connections.datatypes.datatypes import EdgesJSON
-from artist_connections.helpers.helpers import write_to_json
+from artist_connections.helpers.helpers import timing, write_to_json
 from difflib import get_close_matches, SequenceMatcher
 from collections import defaultdict
 
@@ -55,17 +55,21 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
             features.remove(feature)
             return feature
         if " /" in feature:
-            if artist == feature.replace(" /", ","):
+            if artist == feature.replace(" /", ",").replace(u"\u200b", ""):
                 features.remove(feature)
                 return artist
         if " / " in feature:
-            if artist == feature.replace(" / ", ","):
+            if artist == feature.replace(" / ", ",").replace(u"\u200b", ""):
                 features.remove(feature)
                 return artist
         if u"\u00a0" in feature:
             if artist == feature.replace(u"\u00a0", " "):
                 features.remove(feature)
                 return artist
+        if artist == feature.replace(u"\u200b", ""):
+            features.remove(feature)
+            return artist
+        
         
 
     if "(" in artist and ")" in artist:
@@ -85,11 +89,11 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
                 return feature
 
     return artist
-        
-def main(start_time: float) -> None:
+
+@timing 
+def main() -> None:
     df = pl.read_csv(r"data/song_lyrics_modified.csv")
     data: EdgesJSON = {}
-    print("--- %s seconds --- to load DF" % (time.time() - start_time))
 
     # too lazy to filter this stuff any other way
     custom_list = ["Meng Jia & Jackson Wang ( / )","Oblivion (U)","7 Princess (7)","Josielle Gomes (J)","LUCIA (P)","Serenity Flores (s)","Yoohyeon & Dami (&)","Rumble-G (-G)","Kenza Mechiche Alami(Me)","D9 (9)","(`) (Emotional Trauma)","Dimitri Romanee (CV. )"]
@@ -136,6 +140,4 @@ def main(start_time: float) -> None:
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-    main(start_time)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    main()

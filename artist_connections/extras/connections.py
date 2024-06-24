@@ -1,4 +1,4 @@
-from artist_connections.datatypes.datatypes import EdgesJSON, Connections, Array
+from artist_connections.datatypes.datatypes import EdgesJSON, Connections, connection_factory
 from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter, timing
 import matplotlib.pyplot as plt
 import time
@@ -14,18 +14,25 @@ def create_connections(edges_json: EdgesJSON) -> Connections:
         raise ValueError("Filter list is None")
     
 
-    connections: Connections = defaultdict(lambda: Array(2)) # "artist": (in, out)
+    connections: Connections = defaultdict(connection_factory) # "artist": (in, out)
     for artist, data in edges_json.items():
         features = data["features"]
         if not should_filter(artist, filter_list):
-            connections[artist][0] += sum(features.values())
+            connections[artist]["received"] += sum(features.values())
+
+            if connections[artist]["genre"] is not None:
+                connections[artist]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
+
 
         for key, value in features.items():
             if not should_filter(key, filter_list):
-                connections[key][1] += value
+                connections[key]["given"] += value
+
+                if connections[key]["genre"] is not None:
+                    connections[key]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
     
     # sort by total of in + out
-    return dict(sorted(connections.items(), key=lambda x: x[1][0] + x[1][1], reverse=True))
+    return dict(sorted(connections.items(), key=lambda x: x[1]["received"] + x[1]["given"], reverse=True))
 
 def set_font_color(ax, color):
     ax.set_xlabel(ax.get_xlabel(), color=color)  # X-axis label
@@ -37,17 +44,20 @@ def set_font_color(ax, color):
         label.set_color(color)  # Tick labels
 
 @timing
-def show_connections_graph(connections: Connections, limit: int):
+def show_connections_graph(connections: Connections, limit: int, dark: bool = False):
+    if limit > len(connections) or limit < 0:
+        raise ValueError("Limit out of bounds") 
+    
     tuples = list(connections.items())[:limit]
-    data = [[(x, "Features received", y[0]), (x, "Features given", y[1])] for x, y in tuples]
+    data = [[(x, "Features received", y["received"]), (x, "Features given", y["given"])] for x, y in tuples]
     data = list(itertools.chain.from_iterable(data))
     
     df = pl.DataFrame(data=data, schema=["artist", "direction", "connections"])
 
     colour1 = rgba_to_hex(58, 201, 255)
     colour2 = rgba_to_hex(252, 73, 100)
-    font_colour = "white"
-    bg_colour = "black"
+    font_colour = "white" if dark else "black"
+    bg_colour = "black" if dark else "white"
 
     g = sns.catplot(
         data=df, kind="bar",
@@ -70,6 +80,35 @@ def show_connections_graph(connections: Connections, limit: int):
     plt.subplots_adjust(top=0.85)
     plt.show()
 
+@timing
+def show_connections_scatter_plot(connections: Connections, limit: int, dark: bool = False):
+    if limit > len(connections) or limit < 0:
+        raise ValueError("Limit out of bounds") 
+    
+    tuples = list(connections.items())[:limit]
+    data = [(x, y["received"], y["given"], y["genre"]) for x, y in tuples] # received, given
+
+    df = pl.DataFrame(data=data, schema=["artist", "features received", "features given", "genre"])
+
+    font_colour = "white" if dark else "black"
+    bg_colour = "black" if dark else "white"
+
+    fig, ax = plt.subplots()
+    fig.patch.set_facecolor(bg_colour)
+    fig.suptitle(f"Features received vs features given for top {limit} artists", fontsize=16, color=font_colour)
+    g = sns.scatterplot(data=df, x="features received", y="features given", hue="genre", ax=ax, edgecolor=None)
+    g.set(facecolor=bg_colour)
+    ax.set_facecolor(bg_colour)
+    ax.set_xlabel('Features received', color=font_colour)
+    ax.set_ylabel('Features given', color=font_colour)
+    ax.tick_params(axis='x', colors=font_colour)
+    ax.tick_params(axis='y', colors=font_colour)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(font_colour)
+
+    plt.show()
+
+
 def main():
     edges_data = load_edges_json("data/edges.json")
     if edges_data is None:
@@ -77,13 +116,16 @@ def main():
    
     connections = create_connections(edges_data)
 
-    show_connections_graph(connections, 30)
+    #show_connections_graph(connections, 30)
+    #show_connections_scatter_plot(connections, len(connections))
+    
     counter = 0
     for k, v in connections.items():
         print(k, v)
         counter += 1
         if counter > 20:
             break
+    
     
 
 if __name__ == "__main__":

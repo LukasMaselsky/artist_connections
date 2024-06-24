@@ -5,7 +5,7 @@ type EdgesJSON = dict[str, ArtistData]
 type NodesJSON = list[str]
 
 type Edges = list[tuple[str, str, int]]
-type Connections = dict[str, Array]
+type Connections = dict[str, Connection]
 
 class ArtistData(TypedDict):
     features: defaultdict[str, int]
@@ -13,19 +13,19 @@ class ArtistData(TypedDict):
     feat_songs: int
     solo_songs: int
 
-class Array():
-    def __init__(self, size: int, default_val: int = 0):
-        self.size = size
-        self.data = [default_val] * size
+class Connection(TypedDict):
+    received: int
+    given: int
+    genre: str
 
-    def __getitem__(self, index: int) -> int:
-        return self.data[index]
+DEFAULT_CONNECTION = {
+    "received": 0,
+    "given": 0,
+    "genre": "",
+}
 
-    def __setitem__(self, index: int, value: int):
-        self.data[index] = value
-
-    def __repr__(self):
-        return repr(self.data)
+def connection_factory() -> Connection:
+    return Connection(**DEFAULT_CONNECTION)
 
 class GraphNetworkX(TypedDict):
     nodes: list[str]

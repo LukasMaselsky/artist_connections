@@ -33,8 +33,8 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
         nodes.add(key)
 
     # all outgoing nodes to {query}
-    for artist, features in edges_json.items():
-        if query in features:
+    for artist, data in edges_json.items():
+        if query in data["features"]:
             nodes.add(artist)
        
                 
@@ -42,7 +42,7 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
         if node not in edges_json:
             # node exists but not in edges_json
             # means that this is a feature artist but they dont have a song of their own with a feature
-            # * node should salways still exist in nodes_json if generated using edges_json in other script
+            # * node should always still exist in nodes_json if generated using edges_json in other script
             continue
             
         for key, value in edges_json[node]["features"].items():
@@ -75,7 +75,8 @@ def show_igraph(edges: Edges, full_graph=False):
     visual_style["vertex_label"] = G.vs["name"]
     visual_style["vertex_label_color"] = "white"
     visual_style["vertex_color"] = "skyblue"
-    visual_style["vertex_size"] = [degree * 10 for degree in G.vs.degree()]
+    sizes = [degree * 10 for degree in G.vs.degree()]
+    visual_style["vertex_size"] = sizes
     visual_style["vertex_label_size"] = 8
     visual_style["vertex_label_dist"] = 0.6
     visual_style["edge_color"] = rgba_to_hex(58, 201, 255, 0.3)
@@ -84,7 +85,9 @@ def show_igraph(edges: Edges, full_graph=False):
     visual_style["edge_arrow_size"], visual_style["edge_arrow_width"] = arrow_size, arrow_size
 
     layout = G.layout("kamada_kawai" if not full_graph else "lgl")
-    ig.plot(G, layout=layout, target=ax, **visual_style)
+    bbox = (50, 50) #? doesnt work
+    layout.fit_into(bbox=bbox)
+    ig.plot(G, layout=layout, target=ax, bbox=bbox, **visual_style)
     plt.show()
 
 '''
