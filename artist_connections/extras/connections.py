@@ -1,35 +1,29 @@
 from artist_connections.datatypes.datatypes import EdgesJSON, Connections, connection_factory
-from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter, timing
+from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing
 import matplotlib.pyplot as plt
-import time
 from collections import defaultdict
 import seaborn as sns
 import polars as pl
 import itertools
+import matplotlib as mpl
 
 @timing
 def create_connections(edges_json: EdgesJSON) -> Connections:
-    filter_list = load_filter_list_json("data/filter_list.json")
-    if filter_list is None:
-        raise ValueError("Filter list is None")
-    
-
     connections: Connections = defaultdict(connection_factory) # "artist": (in, out)
     for artist, data in edges_json.items():
         features = data["features"]
-        if not should_filter(artist, filter_list):
-            connections[artist]["received"] += sum(features.values())
+        
+        connections[artist]["received"] += sum(features.values())
 
-            if connections[artist]["genre"] is not None:
-                connections[artist]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
+        if connections[artist]["genre"] is not None:
+            connections[artist]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
 
 
-        for key, value in features.items():
-            if not should_filter(key, filter_list):
-                connections[key]["given"] += value
+        for key, value in features.items():     
+            connections[key]["given"] += value
 
-                if connections[key]["genre"] is not None:
-                    connections[key]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
+            if connections[key]["genre"] is not None:
+                connections[key]["genre"] = max(data["genres"], key=lambda k:data["genres"].get(k, ""))
     
     # sort by total of in + out
     return dict(sorted(connections.items(), key=lambda x: x[1]["received"] + x[1]["given"], reverse=True))
@@ -110,14 +104,15 @@ def show_connections_scatter_plot(connections: Connections, limit: int, dark: bo
 
 
 def main():
-    edges_data = load_edges_json("data/edges.json")
+    mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
+    edges_data = load_json("data/edges.json", EdgesJSON)
     if edges_data is None:
         raise ValueError("Data is None")
    
     connections = create_connections(edges_data)
 
-    #show_connections_graph(connections, 30)
-    #show_connections_scatter_plot(connections, len(connections))
+    show_connections_graph(connections, 30)
+    show_connections_scatter_plot(connections, 30)
     
     counter = 0
     for k, v in connections.items():

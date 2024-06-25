@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import EdgesJSON
-from artist_connections.helpers.helpers import load_edges_json, load_filter_list_json, rgba_to_hex, should_filter, timing
+from artist_connections.helpers.helpers import load_json, timing
 import matplotlib.pyplot as plt
 import time
 from collections import defaultdict
@@ -10,9 +10,6 @@ import itertools
 @timing
 def sort_by_song_count(edges_json: EdgesJSON) -> EdgesJSON:
     return dict(sorted(edges_json.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
-
-def filter_edges(edges_json: EdgesJSON, filter_list: list[str]) -> EdgesJSON:
-    return {k:v for k, v in edges_json.items() if not should_filter(k, filter_list)}
 
 def show_scatter_plot(edges_json: EdgesJSON, limit: int, dark: bool = False):
     if limit > len(edges_json) or limit < 0:
@@ -43,19 +40,14 @@ def show_scatter_plot(edges_json: EdgesJSON, limit: int, dark: bool = False):
     plt.show()
 
 def main():
-    edges_data = load_edges_json("data/edges.json")
+    edges_data = load_json("data/edges.json", EdgesJSON)
     if edges_data is None:
         raise ValueError("Data is None")
     
-    filter_list = load_filter_list_json("data/filter_list.json")
-    if filter_list is None:
-        raise ValueError("Filter list is None")
-   
     sorted_edges = sort_by_song_count(edges_data)
-    filtered_edges = filter_edges(sorted_edges, filter_list)
     
     count = 0
-    for k, v in filtered_edges.items():
+    for k, v in sorted_edges.items():
         if v["solo_songs"] < 1 and v["feat_songs"] > 10:
             count += 1
             print(k, v["feat_songs"], v["solo_songs"])
@@ -63,7 +55,7 @@ def main():
             break
     print(count)
     
-    #show_scatter_plot(filtered_edges, 1000)
+    #show_scatter_plot(sorted_edges, 1000)
 
     
 

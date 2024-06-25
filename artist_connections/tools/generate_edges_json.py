@@ -1,7 +1,7 @@
 import polars as pl
 import time
 from artist_connections.datatypes.datatypes import EdgesJSON
-from artist_connections.helpers.helpers import timing, write_to_json
+from artist_connections.helpers.helpers import timing, write_to_json, load_json
 from difflib import get_close_matches, SequenceMatcher
 from collections import defaultdict
 
@@ -90,10 +90,19 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
 
     return artist
 
+def should_filter(s: str, filter_list: list[str]) -> bool:
+    if s in filter_list:
+        return True
+    return False
+
 @timing 
 def main() -> None:
     df = pl.read_csv(r"data/song_lyrics_modified.csv")
     data: EdgesJSON = {}
+
+    filter_list = load_json("data/filter_list.json", list[str])
+    if filter_list is None:
+        raise ValueError("Filter list is None")
 
     # too lazy to filter this stuff any other way
     custom_list = ["Meng Jia & Jackson Wang ( / )","Oblivion (U)","7 Princess (7)","Josielle Gomes (J)","LUCIA (P)","Serenity Flores (s)","Yoohyeon & Dami (&)","Rumble-G (-G)","Kenza Mechiche Alami(Me)","D9 (9)","(`) (Emotional Trauma)","Dimitri Romanee (CV. )"]
@@ -103,6 +112,9 @@ def main() -> None:
     for row in df.iter_rows():
         features: list[str] = parse_features(row[1])
         artist = process(row[0], features, custom_list)
+
+        if should_filter(artist, filter_list):
+            continue
 
         if artist not in data:
             data[artist] = {
@@ -128,6 +140,8 @@ def main() -> None:
         for feature in features:
             # prevents artist being "featured" on their own song recorded as an actual feature
             if SequenceMatcher(None, feature, artist).ratio() > 0.7: 
+                continue
+            if should_filter(feature, filter_list):
                 continue
 
             data[artist]["features"][feature] += 1

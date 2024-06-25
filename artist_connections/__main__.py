@@ -1,10 +1,12 @@
+from typing import Type
 from artist_connections.datatypes.datatypes import Edges, EdgesJSON
-from artist_connections.helpers.helpers import load_edges_json, rgba_to_hex, timing
+from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing
 import networkx as nx
 import matplotlib.pyplot as plt
 from difflib import get_close_matches
 from pyvis.network import Network
 import igraph as ig
+import matplotlib as mpl
 
 
 #* run with 'python -m artist_connections'
@@ -108,12 +110,12 @@ def show_graph(edges: Edges) -> None:
 '''
     
 def main():
-  
+    mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
     query: str = "JMSN"
-    edges_data = load_edges_json("data/edges.json")
+    edges_data = load_json("data/edges.json", EdgesJSON)
 
     if edges_data is None:
-        raise ValueError("Data is None")
+        return
 
     validated_query = search(edges_data, query)
     

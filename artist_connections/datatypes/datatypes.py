@@ -1,12 +1,5 @@
 from typing import TypedDict
 from collections import defaultdict
-
-type EdgesJSON = dict[str, ArtistData]
-type NodesJSON = list[str]
-
-type Edges = list[tuple[str, str, int]]
-type Connections = dict[str, Connection]
-
 class ArtistData(TypedDict):
     features: defaultdict[str, int]
     genres: defaultdict[str, int]
@@ -27,6 +20,10 @@ DEFAULT_CONNECTION = {
 def connection_factory() -> Connection:
     return Connection(**DEFAULT_CONNECTION)
 
+EdgesJSON = dict[str, ArtistData]
+
+Edges = list[tuple[str, str, int]]
+Connections = dict[str, Connection]
 class GraphNetworkX(TypedDict):
     nodes: list[str]
     edges: Edges

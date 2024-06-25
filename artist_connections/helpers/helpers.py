@@ -1,7 +1,9 @@
-from artist_connections.datatypes.datatypes import EdgesJSON, NodesJSON
+from artist_connections.datatypes.datatypes import EdgesJSON
+from typing import TypeVar, Type
 import json
 from functools import wraps
 import time
+import os
 
 def timing(f):
     @wraps(f)
@@ -25,37 +27,25 @@ def rgba_to_hex(r: int, g: int, b: int, a: float = 1):
 
     return '#{:02x}{:02x}{:02x}{:02x}'.format(r, g, b, int(255 * a))
 
-def should_filter(s: str, filter_list: list[str]) -> bool:
-    if s in filter_list:
-        return True
-    return False
+T = TypeVar("T")
 
 @timing
-def load_edges_json(path: str) -> EdgesJSON | None:
-    try:
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-        return data
-    except Exception as e:
-        return None
+def load_json(path: str, type: Type[T]) -> T | None:
 
-@timing
-def load_nodes_json(path: str) -> list[str] | None:
-    try:
-        with open(path) as f:
-            data: NodesJSON = json.load(f)
-        return data
-    except Exception as e:
-        return None
-    
-@timing
-def load_filter_list_json(path: str) -> list[str] | None:
+    if not os.path.exists(path):
+        print("File not found, check that you have the correct path")
+
     try:
         with open(path, encoding="utf-8") as f:
-            data: list[str] = json.load(f)
+            data: T = json.load(f)
         return data
+    except FileNotFoundError:
+        print("File not found")
+    except json.JSONDecodeError:
+        print("Invalid JSON format")
     except Exception as e:
-        return None
+        print(f"Unnexpected error: {e}")
+
 
 @timing
 def write_to_json(data, path: str) -> None:
