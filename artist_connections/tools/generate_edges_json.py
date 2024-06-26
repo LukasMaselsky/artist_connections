@@ -123,19 +123,22 @@ def main() -> None:
                 "feat_songs": 0,
                 "solo_songs": 0
             }
+        
+        data[artist]["genres"][row[2]] += 1
 
         if len(features) == 0:
             data[artist]["solo_songs"] += 1
+            continue
         else:
             # prevents artist being "featured" on their own song recorded as an actual feature
             # e.g. Cam'ron, {"Cam\\'ron"} gets processed to Cam'ron, [Cam'ron], so this should count as solo
             if len(features) == 1 and artist == features[0]:
                 data[artist]["solo_songs"] += 1
+                continue
             else:
                 data[artist]["feat_songs"] += 1
         
 
-        data[artist]["genres"][row[2]] += 1
 
         for feature in features:
             # prevents artist being "featured" on their own song recorded as an actual feature

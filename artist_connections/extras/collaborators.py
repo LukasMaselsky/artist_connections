@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import EdgesJSON
-from artist_connections.helpers.helpers import load_json, timing
+from artist_connections.helpers.helpers import load_json, scatter_plot, timing, write_to_json
 import matplotlib.pyplot as plt
 import time
 from collections import defaultdict
@@ -11,9 +11,11 @@ import itertools
 def sort_by_song_count(edges_json: EdgesJSON) -> EdgesJSON:
     return dict(sorted(edges_json.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
 
-def show_scatter_plot(edges_json: EdgesJSON, limit: int, dark: bool = False):
+def show_scatter_plot(edges_json: EdgesJSON, limit: int, label_limit: int, dark: bool = False):
     if limit > len(edges_json) or limit < 0:
-        raise ValueError("Limit out of bounds") 
+        raise ValueError("Limit out of bounds")
+    if label_limit > limit:
+        raise ValueError("Label limit out of bounds")
     
     tuples = list(edges_json.items())[:limit]
     #* genre of an artist is approximated by the most common genre of their songs
@@ -24,28 +26,26 @@ def show_scatter_plot(edges_json: EdgesJSON, limit: int, dark: bool = False):
     font_colour = "white" if dark else "black"
     bg_colour = "black" if dark else "white"
 
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor(bg_colour)
-    fig.suptitle(f"Solo vs feature songs for top {limit} artist with most songs", fontsize=16, color=font_colour)
-    g = sns.scatterplot(data=df, x="solo songs", y="feat songs", hue="genre", ax=ax, edgecolor=None)
-    g.set(facecolor=bg_colour)
-    ax.set_facecolor(bg_colour)
-    ax.set_xlabel('Solo songs', color=font_colour)
-    ax.set_ylabel('Songs with features', color=font_colour)
-    ax.tick_params(axis='x', colors=font_colour)
-    ax.tick_params(axis='y', colors=font_colour)
-    for spine in ax.spines.values():
-        spine.set_edgecolor(font_colour)
+    #scatter_plot(df, "solo songs", "feat songs", "genre", 
+    #            f"Solo vs feature songs for top {limit} artists with most songs", 
+    #            font_colour, bg_colour, label_limit)
+
+    m = []
+    for row in df.iter_rows():
+        if row[3] == "misc":
+            m.append(row[0])
+    write_to_json(m, "data/l.json")
 
     plt.show()
 
 def main():
     edges_data = load_json("data/edges.json", EdgesJSON)
-    if edges_data is None:
-        raise ValueError("Data is None")
+    if edges_data is None: return
     
     sorted_edges = sort_by_song_count(edges_data)
+    show_scatter_plot(sorted_edges, limit=len(sorted_edges), label_limit=10)
     
+    '''
     count = 0
     for k, v in sorted_edges.items():
         if v["solo_songs"] < 1 and v["feat_songs"] > 10:
@@ -54,10 +54,7 @@ def main():
         if count > 50:
             break
     print(count)
+    '''
     
-    #show_scatter_plot(sorted_edges, 1000)
-
-    
-
 if __name__ == "__main__":
     main()
