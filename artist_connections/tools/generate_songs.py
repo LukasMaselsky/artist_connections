@@ -1,9 +1,7 @@
 import polars as pl
-import time
 from artist_connections.datatypes.datatypes import SongData, Songs
 from artist_connections.helpers.helpers import timing, write_to_json, load_json, parse_features, should_filter, process
 from difflib import SequenceMatcher
-from collections import defaultdict
 
 #v1: 216 sec
 #* run with 'python -m artist_connections.tools.generate_songs' from top

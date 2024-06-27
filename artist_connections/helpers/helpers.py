@@ -41,7 +41,7 @@ def timing(func=None, show_arg_vals=True):
             te = time.time()
            
             args_dict = dict(zip(f.__code__.co_varnames, args)) if show_arg_vals else f.__code__.co_varnames
-            print(f'Function {f.__name__} args: {args_dict}, kwargs: {kwargs} took {te-ts:2.4f} seconds\n')
+            print(f'Function {f.__name__}, args: {args_dict}, kwargs: {kwargs} took {te-ts:2.4f} seconds\n')
             return result
         return wrap
     return _decorator(func) if callable(func) else _decorator
@@ -62,7 +62,6 @@ T = TypeVar("T")
 
 @timing
 def load_json(path: str, type: Type[T]) -> T | None:
-
     if not os.path.exists(path):
         print("File not found, check that you have the correct path")
 

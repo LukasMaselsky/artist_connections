@@ -24,7 +24,7 @@ def search(edges_json: Artists, query: str) -> str | None:
     
     return None
     
-@timing
+@timing(show_arg_vals=False)
 def create_singular_graph(edges_json: Artists, query: str) -> Edges:
     nodes: set[str] = set()
     edges: Edges = []
@@ -54,7 +54,7 @@ def create_singular_graph(edges_json: Artists, query: str) -> Edges:
 
     return edges
 
-@timing
+@timing(show_arg_vals=False)
 def create_full_graph(edges_json: Artists) -> Edges:
     edges: Edges = []
     for artist, data in edges_json.items():
@@ -63,7 +63,7 @@ def create_full_graph(edges_json: Artists) -> Edges:
             edges.append((key, artist, value))
     return edges
 
-@timing
+@timing(show_arg_vals=False)
 def show_igraph(edges: Edges, full_graph=False):
     G = ig.Graph()
     G = G.TupleList(edges, directed=True, weights=True)

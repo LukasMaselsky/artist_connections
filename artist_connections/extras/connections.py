@@ -7,7 +7,7 @@ import polars as pl
 import itertools
 import matplotlib as mpl
 
-@timing
+@timing(show_arg_vals=False)
 def create_connections(edges_json: Artists) -> Connections:
     connections: Connections = defaultdict(connection_factory) # "artist": (in, out)
     for artist, data in edges_json.items():
@@ -37,7 +37,7 @@ def set_font_color(ax, color):
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_color(color)  # Tick labels
 
-@timing
+@timing(show_arg_vals=False)
 def show_connections_graph(connections: Connections, limit: int, dark: bool = False):
     if limit > len(connections) or limit < 0:
         raise ValueError("Limit out of bounds") 
@@ -74,7 +74,7 @@ def show_connections_graph(connections: Connections, limit: int, dark: bool = Fa
     plt.subplots_adjust(top=0.85)
     plt.show()
 
-@timing
+@timing(show_arg_vals=False)
 def show_connections_scatter_plot(connections: Connections, limit: int, label_limit: int, dark: bool = False):
     if limit > len(connections) or limit < 0:
         raise ValueError("Limit out of bounds")

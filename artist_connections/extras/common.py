@@ -11,19 +11,22 @@ import matplotlib as mpl
 def sort_songs_by_feature_count(songs: Songs):
     return dict(sorted(songs.items(), key=lambda x: len(x[1]), reverse=True))
 
+@timing(show_arg_vals=False)
+def get_top_songs(songs: Songs, limit: int) -> Songs:
+    if limit > len(songs) or limit < 0:
+        raise ValueError("Limit out of bounds") 
+    return {k: songs[k] for k in list(songs)[:limit]}
+
+@timing
 def main():
     mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
     songs = load_json("data/songs.json", Songs)
     if songs is None: return
    
     sorted_songs = sort_songs_by_feature_count(songs)
-    counter = 0
-    for k, v in sorted_songs.items():
+    subset_songs = get_top_songs(sorted_songs, 30)
+    for k, v in subset_songs.items():
         print(k, len(v))
-
-        if counter + 1 >= 10:
-            break
-        counter += 1
 
 if __name__ == "__main__":
     main()

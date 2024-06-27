@@ -64,8 +64,7 @@ def main() -> None:
             data[artist]["features"][feature] += 1
             
             
-    
-    write_to_json(data, "data/edges_2.json")
+    write_to_json(data, "data/artists.json")
         
 
 

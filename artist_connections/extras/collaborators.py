@@ -7,7 +7,7 @@ import seaborn as sns
 import polars as pl
 import itertools
 
-@timing
+@timing(show_arg_vals=False)
 def sort_by_song_count(edges_json: Artists) -> Artists:
     return dict(sorted(edges_json.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
 
