@@ -6,6 +6,11 @@ class ArtistData(TypedDict):
     feat_songs: int
     solo_songs: int
 
+class SongData(TypedDict):
+    artist: str
+    features: list[str]
+    genre: str
+    year: int
 class Connection(TypedDict):
     received: int
     given: int
@@ -20,7 +25,8 @@ DEFAULT_CONNECTION = {
 def connection_factory() -> Connection:
     return Connection(**DEFAULT_CONNECTION)
 
-EdgesJSON = dict[str, ArtistData]
+Artists = dict[str, ArtistData]
+Songs = dict[str, list[SongData]]
 
 Edges = list[tuple[str, str, int]]
 Connections = dict[str, Connection]

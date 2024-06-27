@@ -1,5 +1,5 @@
-from artist_connections.datatypes.datatypes import EdgesJSON, Connections, connection_factory
-from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing
+from artist_connections.datatypes.datatypes import Artists, Connections, connection_factory
+from artist_connections.helpers.helpers import load_json, rgba_to_hex, scatter_plot, timing
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import seaborn as sns
@@ -8,7 +8,7 @@ import itertools
 import matplotlib as mpl
 
 @timing
-def create_connections(edges_json: EdgesJSON) -> Connections:
+def create_connections(edges_json: Artists) -> Connections:
     connections: Connections = defaultdict(connection_factory) # "artist": (in, out)
     for artist, data in edges_json.items():
         features = data["features"]
@@ -75,9 +75,11 @@ def show_connections_graph(connections: Connections, limit: int, dark: bool = Fa
     plt.show()
 
 @timing
-def show_connections_scatter_plot(connections: Connections, limit: int, dark: bool = False):
+def show_connections_scatter_plot(connections: Connections, limit: int, label_limit: int, dark: bool = False):
     if limit > len(connections) or limit < 0:
-        raise ValueError("Limit out of bounds") 
+        raise ValueError("Limit out of bounds")
+    if label_limit > limit:
+        raise ValueError("Label limit out of bounds")
     
     tuples = list(connections.items())[:limit]
     data = [(x, y["received"], y["given"], y["genre"]) for x, y in tuples] # received, given
@@ -87,32 +89,21 @@ def show_connections_scatter_plot(connections: Connections, limit: int, dark: bo
     font_colour = "white" if dark else "black"
     bg_colour = "black" if dark else "white"
 
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor(bg_colour)
-    fig.suptitle(f"Features received vs features given for top {limit} artists", fontsize=16, color=font_colour)
-    g = sns.scatterplot(data=df, x="features received", y="features given", hue="genre", ax=ax, edgecolor=None)
-    g.set(facecolor=bg_colour)
-    ax.set_facecolor(bg_colour)
-    ax.set_xlabel('Features received', color=font_colour)
-    ax.set_ylabel('Features given', color=font_colour)
-    ax.tick_params(axis='x', colors=font_colour)
-    ax.tick_params(axis='y', colors=font_colour)
-    for spine in ax.spines.values():
-        spine.set_edgecolor(font_colour)
-
+    scatter_plot(df, "features recevied", "features given", "genre", 
+                f"Features received vs features given for top {limit} artists",
+                font_colour, bg_colour, label_limit)
     plt.show()
 
 
 def main():
     mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
-    edges_data = load_json("data/edges.json", EdgesJSON)
-    if edges_data is None:
-        raise ValueError("Data is None")
+    edges_data = load_json("data/artists.json", Artists)
+    if edges_data is None: return
    
     connections = create_connections(edges_data)
 
     show_connections_graph(connections, 30)
-    show_connections_scatter_plot(connections, 30)
+    show_connections_scatter_plot(connections, limit=30, label_limit=5)
     
     counter = 0
     for k, v in connections.items():

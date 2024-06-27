@@ -4,7 +4,8 @@
 *.csv
 *.zip
 *.vscode
-data/edges.json
+data/artists.json
+data/songs.json
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

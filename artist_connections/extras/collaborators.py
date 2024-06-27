@@ -1,4 +1,4 @@
-from artist_connections.datatypes.datatypes import EdgesJSON
+from artist_connections.datatypes.datatypes import Artists
 from artist_connections.helpers.helpers import load_json, scatter_plot, timing, write_to_json
 import matplotlib.pyplot as plt
 import time
@@ -8,10 +8,10 @@ import polars as pl
 import itertools
 
 @timing
-def sort_by_song_count(edges_json: EdgesJSON) -> EdgesJSON:
+def sort_by_song_count(edges_json: Artists) -> Artists:
     return dict(sorted(edges_json.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
 
-def show_scatter_plot(edges_json: EdgesJSON, limit: int, label_limit: int, dark: bool = False):
+def show_scatter_plot(edges_json: Artists, limit: int, label_limit: int, dark: bool = False):
     if limit > len(edges_json) or limit < 0:
         raise ValueError("Limit out of bounds")
     if label_limit > limit:
@@ -39,7 +39,7 @@ def show_scatter_plot(edges_json: EdgesJSON, limit: int, label_limit: int, dark:
     plt.show()
 
 def main():
-    edges_data = load_json("data/edges.json", EdgesJSON)
+    edges_data = load_json("data/artists.json", Artists)
     if edges_data is None: return
     
     sorted_edges = sort_by_song_count(edges_data)

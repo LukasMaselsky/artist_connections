@@ -1,5 +1,5 @@
 from typing import Type
-from artist_connections.datatypes.datatypes import Edges, EdgesJSON
+from artist_connections.datatypes.datatypes import Edges, Artists
 from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -11,10 +11,10 @@ import matplotlib as mpl
 
 #* run with 'python -m artist_connections'
 
-def normalise(str: str):
+def to_ascii(str: str):
     return str.encode("ascii", "ignore").decode()
 
-def search(edges_json: EdgesJSON, query: str) -> str | None:
+def search(edges_json: Artists, query: str) -> str | None:
     if query in edges_json:
         return query
     
@@ -25,7 +25,7 @@ def search(edges_json: EdgesJSON, query: str) -> str | None:
     return None
     
 @timing
-def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
+def create_singular_graph(edges_json: Artists, query: str) -> Edges:
     nodes: set[str] = set()
     edges: Edges = []
 
@@ -55,7 +55,7 @@ def create_singular_graph(edges_json: EdgesJSON, query: str) -> Edges:
     return edges
 
 @timing
-def create_full_graph(edges_json: EdgesJSON) -> Edges:
+def create_full_graph(edges_json: Artists) -> Edges:
     edges: Edges = []
     for artist, data in edges_json.items():
         features = data["features"]
@@ -112,7 +112,7 @@ def show_graph(edges: Edges) -> None:
 def main():
     mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
     query: str = "JMSN"
-    edges_data = load_json("data/edges.json", EdgesJSON)
+    edges_data = load_json("data/artists.json", Artists)
 
     if edges_data is None:
         return
