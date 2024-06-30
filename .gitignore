@@ -6,6 +6,7 @@
 *.vscode
 data/artists.json
 data/songs.json
+data/links.json
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

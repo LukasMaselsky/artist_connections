@@ -11,6 +11,7 @@ class SongData(TypedDict):
     features: list[str]
     genre: str
     year: int
+
 class Connection(TypedDict):
     received: int
     given: int
@@ -27,6 +28,7 @@ def connection_factory() -> Connection:
 
 Artists = dict[str, ArtistData]
 Songs = dict[str, list[SongData]]
+Graph = dict[str, set[str]]
 
 Edges = list[tuple[str, str, int]]
 Connections = dict[str, Connection]

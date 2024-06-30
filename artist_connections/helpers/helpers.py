@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from difflib import SequenceMatcher
 
+class Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return super().default(obj)
+
 def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour: str, bg_colour: str, label_limit: int):
     fig, ax = plt.subplots()
     fig.patch.set_facecolor(bg_colour)
@@ -77,7 +83,7 @@ def load_json(path: str, type: Type[T]) -> T | None:
         print(f"Unnexpected error: {e}")
 
 
-@timing
+@timing(show_arg_vals=False)
 def write_to_json(data: Any, path: str) -> None:
     with open(path, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, ensure_ascii=False)
