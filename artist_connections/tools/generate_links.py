@@ -1,3 +1,4 @@
+import sys
 import polars as pl
 from artist_connections.datatypes.datatypes import Graph
 from artist_connections.helpers.helpers import timing, Encoder, load_json, parse_features, process, should_filter
@@ -31,8 +32,6 @@ def main() -> None:
             continue
 
         add_node(data, artist)
-        if artist not in data:
-            data[artist] = set()
        
         if len(features) == 1 and artist == features[0]:
             continue
