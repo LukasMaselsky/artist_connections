@@ -7,7 +7,15 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from difflib import SequenceMatcher
+from typing import Literal
 
+colors = {"black": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "purple": 35, "cyan": 36, "white": 37}
+styles = {"none": 0, "bold": 1, "underline": 2}
+Colors = Literal["black", "red", "green", "yellow", "blue", "purple", "cyan", "white"]
+Styles = Literal["none", "bold", "underline"]
+
+def styled(text: str, color: Colors = "white", style: Styles = "none") -> str:
+    return f"\033[{styles[style]};{colors[color]};40m{text}\033[0;37;40m"
 class Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
@@ -47,7 +55,7 @@ def timing(func=None, show_arg_vals=True):
             te = time.time()
            
             args_dict = dict(zip(f.__code__.co_varnames, args)) if show_arg_vals else f.__code__.co_varnames
-            print(f'Function {f.__name__}, args: {args_dict}, kwargs: {kwargs} took {te-ts:2.4f} seconds\n')
+            print(f'Function {styled(f.__name__, style="bold")}, args: {args_dict}, kwargs: {kwargs} took {te-ts:2.4f} seconds\n')
             return result
         return wrap
     return _decorator(func) if callable(func) else _decorator

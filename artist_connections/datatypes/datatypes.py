@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Literal
 from collections import defaultdict
 class ArtistData(TypedDict):
     features: defaultdict[str, int]
@@ -32,6 +32,7 @@ Graph = dict[str, set[str]]
 
 Edges = list[tuple[str, str, int]]
 Connections = dict[str, Connection]
+
 class GraphNetworkX(TypedDict):
     nodes: list[str]
     edges: Edges
