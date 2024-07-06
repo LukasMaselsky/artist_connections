@@ -1,7 +1,7 @@
 from collections import deque
 from re import L
 from artist_connections.datatypes.datatypes import Graph
-from artist_connections.helpers.helpers import load_json, styled, timing
+from artist_connections.helpers.helpers import load_json, search, styled, timing
 
 
 def flatten_gen(l: list[str] | str):
@@ -118,10 +118,7 @@ def get_subgraph(links: Graph, limit: int) -> Graph:
 
 @timing(show_arg_vals=False)
 def filter_isolated(links: Graph) -> Graph:
-    graph: Graph = {}
-    for artist, l in links.items():
-        if len(l) != 0:
-            graph[artist] = l
+    graph: Graph = {artist: l for artist, l in links.items() if len(l) != 0}
     return graph
 
 def separation_game(links: Graph):
@@ -129,26 +126,17 @@ def separation_game(links: Graph):
     print("See how many degrees of separation 2 artist have\n")
 
     while True:
-        artist1 = input("Artist 1: ")
-        while artist1 not in links:
-            print("Artist 1 could not be found")
-            artist1 = input("Artist 1: ")
-        
-        artist2 = input("Artist 2: ")
-        while artist2 not in links:
-            print("Artist 2 could not be found")
-            artist2 = input("Artist 2: ")
+        artist1 = search(links, "Artist 1: ")
+        artist2 = search(links, "Artist 1: ")
 
         path = bbfs(links, artist1, artist2)
         if path is None: 
             print("No path found")
         else:
-            path = flatten(path)
-
             print()
             print_path(path)
             print(f"The artists have {len(path) - 1} degrees of separation")
-        answer = input("Play again? [Y] = Yes, [N] = No: ")
+        answer = input("Play again? [y/n]: ")
         if answer.lower() != "y":
             break
         print()
@@ -157,7 +145,7 @@ def main():
     links = load_json("data/links.json", Graph)
     if links is None: return
     links = filter_isolated(links) #* this gets it down from ~840 000 -> ~457 000
-    
+
     separation_game(links)
     return
     subgraph = get_subgraph(links, 1000)

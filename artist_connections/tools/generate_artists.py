@@ -49,8 +49,6 @@ def main() -> None:
             if len(features) == 1 and artist == features[0]:
                 data[artist]["solo_songs"] += 1
                 continue
-            else:
-                data[artist]["feat_songs"] += 1
         
 
 
@@ -62,6 +60,9 @@ def main() -> None:
                 continue
 
             data[artist]["features"][feature] += 1
+        
+        if len(data[artist]["features"]) != 0:
+            data[artist]["feat_songs"] += 1
             
             
     write_to_json(data, "data/artists.json")

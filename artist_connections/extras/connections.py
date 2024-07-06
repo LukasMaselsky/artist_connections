@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import Artists, Connections, connection_factory
-from artist_connections.helpers.helpers import load_json, rgba_to_hex, scatter_plot, timing
+from artist_connections.helpers.helpers import int_input, load_json, rgba_to_hex, scatter_plot, styled, timing
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import seaborn as sns
@@ -89,7 +89,7 @@ def show_connections_scatter_plot(connections: Connections, limit: int, label_li
     font_colour = "white" if dark else "black"
     bg_colour = "black" if dark else "white"
 
-    scatter_plot(df, "features recevied", "features given", "genre", 
+    scatter_plot(df, "features received", "features given", "genre", 
                 f"Features received vs features given for top {limit} artists",
                 font_colour, bg_colour, label_limit)
     plt.show()
@@ -102,15 +102,18 @@ def main():
    
     connections = create_connections(edges_data)
 
-    show_connections_graph(connections, 30)
-    show_connections_scatter_plot(connections, limit=30, label_limit=5)
+    print("How many entries would you like in the bar plot?")
+    print(styled("WARNING: ANYTHING ABOVE 40 WILL MAKE THE LABELS UNREADABLE", "red", "bold"))
+    bar = int_input("Entries: ", len(connections))
     
-    counter = 0
-    for k, v in connections.items():
-        print(k, v)
-        counter += 1
-        if counter > 20:
-            break
+    print(f"\nHow many entries would you like in the scatter plot? (max {len(connections)})")
+    scatter = int_input("Entries: ", len(connections))
+
+    print("\nHow many labels shown would you like for the scatter plot?")
+    scatter_labels = int_input("Labels: ", scatter)
+
+    show_connections_graph(connections, bar)
+    show_connections_scatter_plot(connections, limit=scatter, label_limit=scatter_labels)
     
     
 

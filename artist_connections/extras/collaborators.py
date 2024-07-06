@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import Artists
-from artist_connections.helpers.helpers import load_json, scatter_plot, timing, write_to_json
+from artist_connections.helpers.helpers import int_input, load_json, scatter_plot, timing
 import matplotlib.pyplot as plt
 import time
 from collections import defaultdict
@@ -26,15 +26,17 @@ def show_scatter_plot(edges_json: Artists, limit: int, label_limit: int, dark: b
     font_colour = "white" if dark else "black"
     bg_colour = "black" if dark else "white"
 
-    #scatter_plot(df, "solo songs", "feat songs", "genre", 
-    #            f"Solo vs feature songs for top {limit} artists with most songs", 
-    #            font_colour, bg_colour, label_limit)
+    scatter_plot(df, "solo songs", "feat songs", "genre", 
+                f"Solo vs feature songs for top {limit} artists with most songs", 
+                font_colour, bg_colour, label_limit)
 
+    '''
     m = []
     for row in df.iter_rows():
         if row[3] == "misc":
             m.append(row[0])
     write_to_json(m, "data/l.json")
+    '''
 
     plt.show()
 
@@ -42,8 +44,16 @@ def main():
     edges_data = load_json("data/artists.json", Artists)
     if edges_data is None: return
     
+
     sorted_edges = sort_by_song_count(edges_data)
-    show_scatter_plot(sorted_edges, limit=len(sorted_edges), label_limit=10)
+
+    print(f"\nHow many entries would you like in the scatter plot? (max {len(sorted_edges)})")
+    scatter = int_input("Entries: ", len(sorted_edges))
+
+    print("\nHow many labels shown would you like for the scatter plot?")
+    scatter_labels = int_input("Labels: ", scatter)
+
+    show_scatter_plot(sorted_edges, limit=scatter, label_limit=scatter_labels)
     
     '''
     count = 0

@@ -5,7 +5,7 @@ import polars as pl
 def main():
     df = pl.scan_csv(r"data/song_lyrics.csv").select(pl.col("title", "artist", "features", "tag", "year", "language_cld3"))
     
-    df.collect().write_csv(r"data/song_lyrics_modified_2.csv", separator=",")
+    df.collect().write_csv(r"data/song_lyrics_modified.csv", separator=",")
 
 if __name__ == "__main__":
     main()

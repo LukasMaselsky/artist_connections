@@ -33,7 +33,7 @@ def main() -> None:
 
         add_node(data, artist)
        
-        if len(features) == 1 and artist == features[0]:
+        if len(features) == 1 and artist == features[0]: #* technically unnecesary since sequence matcher should catch it
             continue
 
         for feature in features:

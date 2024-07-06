@@ -1,9 +1,7 @@
-from typing import Any, Type
 from artist_connections.datatypes.datatypes import Edges, Artists
-from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing
+from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing, search
 import networkx as nx
 import matplotlib.pyplot as plt
-from difflib import get_close_matches
 from pyvis.network import Network
 import igraph as ig
 import matplotlib as mpl
@@ -13,16 +11,6 @@ import matplotlib as mpl
 
 def to_ascii(str: str):
     return str.encode("ascii", "ignore").decode()
-
-def search(edges_json: Artists, query: str) -> str | None:
-    if query in edges_json:
-        return query
-    
-    matches = get_close_matches(query, edges_json.keys(), n=1, cutoff=0.6)
-    if len(matches) > 0: 
-        return matches[0] 
-    
-    return None
     
 @timing(show_arg_vals=False)
 def create_singular_graph(edges_json: Artists, query: str, extended=True) -> Edges:
@@ -138,18 +126,15 @@ def show_graph(edges: Edges) -> None:
     
 def main():
     mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"
-    query: str = "Tyler, The Creator"
-    edges_data = load_json("data/artists.json", Artists)
+    artists = load_json("data/artists.json", Artists)
 
-    if edges_data is None:
-        return
+    if artists is None:
+        raise ValueError("Artist JSON is None")
 
-    validated_query = search(edges_data, query)
+    query = search(artists, "Artist name: ")
     
-    if validated_query is None:
-        raise ValueError("Search query invalid, check your spelling")
-    graph = create_singular_graph(edges_data, validated_query)
-    #graph = create_full_graph(edges_data)
+    graph = create_singular_graph(artists, query)
+    #graph = create_full_graph(artists)
    
     show_igraph(graph)
     

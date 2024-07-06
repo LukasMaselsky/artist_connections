@@ -6,7 +6,7 @@ import time
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-from difflib import SequenceMatcher
+from difflib import SequenceMatcher, get_close_matches
 from typing import Literal
 
 colors = {"black": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "purple": 35, "cyan": 36, "white": 37}
@@ -26,11 +26,11 @@ def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour
     fig, ax = plt.subplots()
     fig.patch.set_facecolor(bg_colour)
     fig.suptitle(title, fontsize=16, color=font_colour)
-    g = sns.scatterplot(data=df, x="solo songs", y="feat songs", hue="genre", ax=ax, edgecolor=None)
+    g = sns.scatterplot(data=df, x=x, y=y, hue=hue, ax=ax, edgecolor=None)
     g.set(facecolor=bg_colour)
     ax.set_facecolor(bg_colour)
-    ax.set_xlabel('Solo songs', color=font_colour)
-    ax.set_ylabel('Songs with features', color=font_colour)
+    ax.set_xlabel(x, color=font_colour)
+    ax.set_ylabel(y, color=font_colour)
     ax.tick_params(axis='x', colors=font_colour)
     ax.tick_params(axis='y', colors=font_colour)
     for spine in ax.spines.values():
@@ -38,7 +38,7 @@ def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour
 
     # add point labels
     for i, row in enumerate(df.iter_rows()):
-        g.text(row[1], row[2] + 7, row[0], horizontalalignment='center', size='small', color='black', weight='medium')
+        g.text(row[1], row[2] + 15, row[0], horizontalalignment='center', size='small', color='black', weight='medium')
         if i >= label_limit - 1:
             break
 
@@ -95,6 +95,15 @@ def load_json(path: str, type: Type[T]) -> T | None:
 def write_to_json(data: Any, path: str) -> None:
     with open(path, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, ensure_ascii=False)
+
+def custom_filter(s: str) -> bool:
+    '''For all the bullshit ones, casts of tv shows/musicals etc'''
+
+    #* get rid of broadway/musical/tv show casts
+    if "cast of" in s.lower():
+        return True
+    
+    return False
 
 def parse_features(s: str) -> list[str]:
     if len(s) == 2:
@@ -175,4 +184,53 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
 def should_filter(s: str, filter_list: list[str]) -> bool:
     if s in filter_list:
         return True
+    if custom_filter(s):
+        return True
     return False
+
+def search(data: dict[str, T], message: str) -> str:
+    def search_for(data: dict[str, T], query: str) -> str | None:
+        if query in data:
+            return query
+        
+        matches = get_close_matches(query, data.keys(), n=3, cutoff=0.6)
+        if len(matches) == 0: return None 
+        
+        print("An exact match couldn't be found, did you mean: ")
+
+        for i, match in enumerate(matches):
+            print(f"[{i}] {match}")
+
+        while True:
+            try:
+                choose = int(input("Choose an option: "))
+                if choose >= len(matches) or choose < 0:
+                    print("Please enter a valid number")
+                else:
+                    break
+            except ValueError:
+                print("Please enter a number")
+
+        return matches[choose]
+   
+    query: str = input("Artist name: ")
+    searched_for = search_for(data, query)
+    
+    while searched_for is None:
+        print("Search query invalid, no matches found")
+        query: str = input(message)
+        searched_for = search_for(data, query)
+
+    return searched_for
+
+def int_input(message: str, maximum: int) -> int:
+    while True:
+        try:
+            a = int(input(message))
+            if a > maximum or a < 0:
+                print(f"Please enter a valid number (max {maximum})")
+            else:
+                break
+        except ValueError:
+            print("Please enter a number")
+    return a
