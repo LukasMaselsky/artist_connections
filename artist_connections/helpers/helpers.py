@@ -15,6 +15,20 @@ Colors = Literal["black", "red", "green", "yellow", "blue", "purple", "cyan", "w
 Styles = Literal["none", "bold", "underline"]
 
 def styled(text: str, color: Colors = "white", style: Styles = "none") -> str:
+    '''
+    Return coloured or styled text
+
+    colors: "black", "red", "green", "yellow", "blue", "purple", "cyan", "white"
+    styles: "none", "bold", "underline"
+
+    Args:
+        text (str): text string
+        color (Colors, optional): color of return text. Defaults to "white".
+        style (Styles, optional): style of return text. Defaults to "none".
+
+    Returns:
+        str: styled text
+    '''    
     return f"\033[{styles[style]};{colors[color]};40m{text}\033[0;37;40m"
 class Encoder(json.JSONEncoder):
     def default(self, obj):
@@ -23,6 +37,19 @@ class Encoder(json.JSONEncoder):
         return super().default(obj)
 
 def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour: str, bg_colour: str, label_limit: int):
+    '''Show a matplotlib scatterplot
+
+    Args:
+        df (DataFrame): polars dataframe of points
+        x (str): x label/x col name
+        y (str): y label/y col name
+        hue (str): column to use as legend
+        title (str): title of plot
+        font_colour (str): font color
+        bg_colour (str): background color
+        label_limit (int): number of labels to render
+    '''    
+    
     fig, ax = plt.subplots()
     fig.patch.set_facecolor(bg_colour)
     fig.suptitle(title, fontsize=16, color=font_colour)
@@ -60,7 +87,24 @@ def timing(func=None, show_arg_vals=True):
         return wrap
     return _decorator(func) if callable(func) else _decorator
 
-def rgba_to_hex(r: int, g: int, b: int, a: float = 1):
+def rgba_to_hex(r: int, g: int, b: int, a: float = 1) -> str:
+    '''Convert rgba value to hex string
+
+    Args:
+        r (int): red
+        g (int): green
+        b (int): blue
+        a (float, optional): alpha. Defaults to 1.
+
+    Raises:
+        ValueError: red value of rgba is invalid
+        ValueError: green value of rgba is invalid
+        ValueError: blue value of rgba is invalid
+        ValueError: alpha value of rgba is invalid
+
+    Returns:
+        str: hex string
+    '''    
     if r < 0 or r > 255:
         raise ValueError("r value must be in between 0 and 255")
     if g < 0 or g > 255:
@@ -76,6 +120,15 @@ T = TypeVar("T")
 
 @timing
 def load_json(path: str, type: Type[T]) -> T | None:
+    '''Loads json file to data of type T and returns it
+
+    Args:
+        path (str): path of json file
+        type (Type[T]): type of data to cast loaded data to
+
+    Returns:
+        T | None: data of file or None if load failed
+    '''    
     if not os.path.exists(path):
         print("File not found, check that you have the correct path")
 
@@ -88,16 +141,28 @@ def load_json(path: str, type: Type[T]) -> T | None:
     except json.JSONDecodeError:
         print("Invalid JSON format")
     except Exception as e:
-        print(f"Unnexpected error: {e}")
-
+        print(f"Unexpected error: {e}")
 
 @timing(show_arg_vals=False)
 def write_to_json(data: Any, path: str) -> None:
+    '''Write data to a json file as UTF-8 encoded
+
+    Args:
+        data (Any): any data
+        path (str): json file output path
+    '''    
     with open(path, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, ensure_ascii=False)
 
 def custom_filter(s: str) -> bool:
-    '''For all the bullshit ones, casts of tv shows/musicals etc'''
+    '''For all the bullshit ones, casts of tv shows/musicals etc that can't be detected by program rules
+
+    Args:
+        s (str): artist/feature name
+
+    Returns:
+        bool: True if matches filter rules
+    '''    
 
     #* get rid of broadway/musical/tv show casts
     if "cast of" in s.lower():
@@ -106,6 +171,14 @@ def custom_filter(s: str) -> bool:
     return False
 
 def parse_features(s: str) -> list[str]:
+    '''Convert list of features from a strint to a list, processing each one according to rules
+
+    Args:
+        s (str): list of features as unprocessed string e.g. "{""Cam\\'ron"",""Opera Steve""}"
+
+    Returns:
+        list[str]: list of processed features
+    '''    
     if len(s) == 2:
         # no features
         return []
@@ -128,10 +201,18 @@ def parse_features(s: str) -> list[str]:
 def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     '''
     Format of types of string to be processed:  (dima bamberg),"{""дима бамберг (dima bamberg)""}"
-    Unicode version will always be in features (I think, haven't checked)
+    Unicode version will always be in features (I think, haven't checked all)
     If this format found, always store feature as the artist name, ascii version should be discarded
-    Also things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}
-    '''
+    Also things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}, the feature is discarded
+
+    Args:
+        artist (str): artist name in song description
+        features (list[str]): list of features in the song
+        custom_list (list[str]): features that are hard to filter with rules
+
+    Returns:
+        str: corrected/modified artist name
+    '''      
     if artist in custom_list:
         return features[0]
     
@@ -182,14 +263,71 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     return artist
 
 def should_filter(s: str, filter_list: list[str]) -> bool:
+    '''Returns true if string should be filtered out
+
+    Args:
+        s (str): artist/feature name
+        filter_list (list[str]): list of strings that should be filtered
+
+    Returns:
+        bool: True if should be filtered
+    '''    
     if s in filter_list:
         return True
     if custom_filter(s):
         return True
     return False
 
+def print_options(options: list[str]):
+    for i, option in enumerate(options):
+        print(f"[{i}] {option}")
+
+def int_input(message: str, maximum: int, minimum: int = 0) -> int:
+    '''Returns integer input from user between 0 and max
+
+    Args:
+        message (str): message to be displayed when asking for input
+        maximum (int): maximum value
+        minimum (int, optional): minumum value. Defaults to 0.
+
+    Returns:
+        int: input as integer
+    '''     
+
+    while True:
+        try:
+            a = int(input(message))
+            if a > maximum or a < minimum:
+                print(f"Please enter a valid number ({minimum} to {maximum})")
+            else:
+                break
+        except ValueError:
+            print("Please enter a number")
+    return a
+
 def search(data: dict[str, T], message: str) -> str:
+    '''
+    Takes user input and searches data for the artist name. 
+    If no match found, gives fuzzy found matches as options
+
+    Args:
+        data (dict[str, T]): dictionary dataset
+        message (str): message to be displayed when asking for input
+
+    Returns:
+        str: key in dictionary dataset
+    '''    
+
     def search_for(data: dict[str, T], query: str) -> str | None:
+        '''Find closest matching keys in dataset to query and lets user choose
+
+        Args:
+            data (dict[str, T]): dictionary dataset
+            query (str): artist name
+
+        Returns:
+            str | None: matching key or None if no close match found
+        '''        
         if query in data:
             return query
         
@@ -198,22 +336,13 @@ def search(data: dict[str, T], message: str) -> str:
         
         print("An exact match couldn't be found, did you mean: ")
 
-        for i, match in enumerate(matches):
-            print(f"[{i}] {match}")
+        print_options(matches)
 
-        while True:
-            try:
-                choose = int(input("Choose an option: "))
-                if choose >= len(matches) or choose < 0:
-                    print("Please enter a valid number")
-                else:
-                    break
-            except ValueError:
-                print("Please enter a number")
+        choose = int_input("Choose an option: ", len(matches) - 1)
 
         return matches[choose]
    
-    query: str = input("Artist name: ")
+    query: str = input(message)
     searched_for = search_for(data, query)
     
     while searched_for is None:
@@ -222,15 +351,3 @@ def search(data: dict[str, T], message: str) -> str:
         searched_for = search_for(data, query)
 
     return searched_for
-
-def int_input(message: str, maximum: int) -> int:
-    while True:
-        try:
-            a = int(input(message))
-            if a > maximum or a < 0:
-                print(f"Please enter a valid number (max {maximum})")
-            else:
-                break
-        except ValueError:
-            print("Please enter a number")
-    return a
