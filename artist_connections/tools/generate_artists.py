@@ -49,9 +49,9 @@ def main() -> None:
             if len(features) == 1 and artist == features[0]:
                 data[artist]["solo_songs"] += 1
                 continue
+
         
-
-
+        added = 0
         for feature in features:
             # prevents artist being "featured" on their own song recorded as an actual feature
             if SequenceMatcher(None, feature, artist).ratio() > 0.7: 
@@ -59,10 +59,13 @@ def main() -> None:
             if should_filter(feature, filter_list):
                 continue
 
+            added += 1
             data[artist]["features"][feature] += 1
         
-        if len(data[artist]["features"]) != 0:
+        if added != 0:
             data[artist]["feat_songs"] += 1
+        else:
+            data[artist]["solo_songs"] += 1
             
             
     write_to_json(data, "data/artists.json")

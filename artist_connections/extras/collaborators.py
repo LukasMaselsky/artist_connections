@@ -1,15 +1,7 @@
 from artist_connections.datatypes.datatypes import Artists
-from artist_connections.helpers.helpers import int_input, load_json, scatter_plot, timing
+from artist_connections.helpers.helpers import int_input, load_json, scatter_plot, sort_artists_by_song_count, timing
 import matplotlib.pyplot as plt
-import time
-from collections import defaultdict
-import seaborn as sns
 import polars as pl
-import itertools
-
-@timing(show_arg_vals=False)
-def sort_by_song_count(edges_json: Artists) -> Artists:
-    return dict(sorted(edges_json.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
 
 def show_scatter_plot(edges_json: Artists, limit: int, label_limit: int, dark: bool = False):
     if limit > len(edges_json) or limit < 0:
@@ -45,7 +37,7 @@ def main():
     if edges_data is None: return
     
 
-    sorted_edges = sort_by_song_count(edges_data)
+    sorted_edges = sort_artists_by_song_count(edges_data)
 
     print(f"\nHow many entries would you like in the scatter plot? (max {len(sorted_edges)})")
     scatter = int_input("Entries: ", len(sorted_edges))
