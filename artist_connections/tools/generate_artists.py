@@ -1,8 +1,9 @@
 import polars as pl
 from artist_connections.datatypes.datatypes import Artists
-from artist_connections.helpers.helpers import timing, write_to_json, load_json, parse_features, process, should_filter
+from artist_connections.helpers.helpers import timing, write_json, load_json, parse_features, process, should_filter
 from difflib import SequenceMatcher
 from collections import defaultdict
+import time
 
 # v1: 146 seconds, 77 to load df (whole data)
 # v2: < 1 sec (2 cols (modified))
@@ -22,8 +23,8 @@ def main() -> None:
     custom_list = ["Meng Jia & Jackson Wang ( / )","Oblivion (U)","7 Princess (7)","Josielle Gomes (J)","LUCIA (P)","Serenity Flores (s)","Yoohyeon & Dami (&)","Rumble-G (-G)","Kenza Mechiche Alami(Me)","D9 (9)","(`) (Emotional Trauma)","Dimitri Romanee (CV. )"]
 
     #* title,artist,features,tag,year,language_cld3
-
-    for row in df.iter_rows():
+    
+    for i, row in enumerate(df.iter_rows()):
         features: list[str] = parse_features(row[2])
         artist = process(row[1], features, custom_list)
 
@@ -66,9 +67,8 @@ def main() -> None:
             data[artist]["feat_songs"] += 1
         else:
             data[artist]["solo_songs"] += 1
-            
-            
-    write_to_json(data, "data/artists.json")
+
+    write_json(data, "data/artists.json")
         
 
 

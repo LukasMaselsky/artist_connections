@@ -1,9 +1,7 @@
-import sys
 import polars as pl
 from artist_connections.datatypes.datatypes import Graph
-from artist_connections.helpers.helpers import timing, Encoder, load_json, parse_features, process, should_filter
+from artist_connections.helpers.helpers import timing, encoder, load_json, parse_features, process, should_filter, write_json
 from difflib import SequenceMatcher
-import json
 
 #* run with 'python -m artist_connections.tools.generate_links' from top
 
@@ -48,9 +46,9 @@ def main() -> None:
             data[artist].add(feature)
             data[feature].add(artist)
 
-    json_string = json.dumps(data, cls=Encoder, indent=4)
-    with open('data/links.json', 'w') as json_file:
-        json_file.write(json_string)   
+    write_json(data, 'data/links.json', encoder)
+    
+
         
 
 if __name__ == "__main__":

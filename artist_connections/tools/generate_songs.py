@@ -1,6 +1,6 @@
 import polars as pl
 from artist_connections.datatypes.datatypes import SongData, Songs
-from artist_connections.helpers.helpers import timing, write_to_json, load_json, parse_features, should_filter, process
+from artist_connections.helpers.helpers import timing, write_json, load_json, parse_features, should_filter, process
 from difflib import SequenceMatcher
 
 #v1: 216 sec
@@ -32,7 +32,7 @@ def main() -> None:
                 features.remove(feature)
                 continue
 
-        song = row[0]
+        song = str(row[0])
         song_data: SongData = {
             "artist": artist,
             "features": features,
@@ -45,7 +45,7 @@ def main() -> None:
             data[song].append(song_data)
 
             
-    write_to_json(data, "data/songs.json")
+    write_json(data, "data/songs.json")
         
 
 

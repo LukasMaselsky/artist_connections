@@ -27,7 +27,7 @@ def show_scatter_plot(edges_json: Artists, limit: int, label_limit: int, dark: b
     for row in df.iter_rows():
         if row[3] == "misc":
             m.append(row[0])
-    write_to_json(m, "data/l.json")
+    write_json(m, "data/l.json")
     '''
 
     plt.show()

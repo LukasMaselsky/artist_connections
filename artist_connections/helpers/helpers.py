@@ -1,13 +1,12 @@
 from polars import DataFrame
-from typing import Any, TypeVar, Type
-import json
+from typing import Any, Callable, TypeVar, Type, Literal
+import orjson
 from functools import wraps
 import time
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from difflib import SequenceMatcher, get_close_matches
-from typing import Literal
 from artist_connections.datatypes.datatypes import Artists
 
 
@@ -19,11 +18,10 @@ Styles = Literal["none", "bold", "underline"]
 
 def styled(text: str, color: Colors = "white", style: Styles = "none") -> str: 
     return f"\033[{styles[style]};{colors[color]};40m{text}\033[0;37;40m"
-class Encoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        return super().default(obj)
+
+def encoder(obj):
+    if isinstance(obj, set):
+        return list(obj)
 
 def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour: str, bg_colour: str, label_limit: int):
     fig, ax = plt.subplots()
@@ -84,19 +82,20 @@ def load_json(path: str, type: Type[T]) -> T | None:
 
     try:
         with open(path, encoding="utf-8") as f:
-            data: T = json.load(f)
+            data: T = orjson.loads(f.read())
         return data
     except FileNotFoundError:
         print("File not found")
-    except json.JSONDecodeError:
+    except orjson.JSONDecodeError:
         print("Invalid JSON format")
     except Exception as e:
         print(f"Unexpected error: {e}")
 
 @timing(show_arg_vals=False)
-def write_to_json(data: Any, path: str) -> None:
-    with open(path, "w", encoding="utf-8") as outfile:
-        json.dump(data, outfile, ensure_ascii=False)
+def write_json(data: Any, path: str, encoder: Callable | None = None) -> None:
+    with open(path, "wb") as outfile:
+        out = orjson.dumps(data) if encoder is None else orjson.dumps(data, default=encoder)
+        outfile.write(out)
 
 @timing(show_arg_vals=False)
 def sort_artists_by_song_count(artists: Artists) -> Artists:
@@ -111,15 +110,7 @@ def custom_filter(s: str) -> bool:
     
     return False
 
-def parse_features(s: str) -> list[str]:
-    '''Convert list of features from a strint to a list, processing each one according to rules
-
-    Args:
-        s (str): list of features as unprocessed string e.g. "{""Cam\\'ron"",""Opera Steve""}"
-
-    Returns:
-        list[str]: list of processed features
-    '''    
+def parse_features(s: str) -> list[str]:    
     if len(s) == 2:
         # no features
         return []
@@ -136,8 +127,7 @@ def parse_features(s: str) -> list[str]:
             decoded_s = decoded_s.replace("\\\\$", "$")
             decoded_s = decoded_s.replace("\\\\`", "`")
             strings.append(decoded_s)
-        return strings
-    return []
+    return strings
 
 def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     '''
