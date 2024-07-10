@@ -9,8 +9,6 @@ import seaborn as sns
 from difflib import SequenceMatcher, get_close_matches
 from artist_connections.datatypes.datatypes import Artists
 
-
-
 colors = {"black": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "purple": 35, "cyan": 36, "white": 37}
 styles = {"none": 0, "bold": 1, "underline": 2}
 Colors = Literal["black", "red", "green", "yellow", "blue", "purple", "cyan", "white"]
@@ -101,6 +99,9 @@ def write_json(data: Any, path: str, encoder: Callable | None = None) -> None:
 def sort_artists_by_song_count(artists: Artists) -> Artists:
     return dict(sorted(artists.items(), key=lambda x: x[1]["solo_songs"] + x[1]["feat_songs"], reverse=True))
 
+def to_ascii(str: str):
+    return str.encode("ascii", "ignore").decode()
+
 def custom_filter(s: str) -> bool:
     '''For all the bullshit ones, casts of tv shows/musicals etc that can't be detected by program rules'''    
 
@@ -129,6 +130,19 @@ def parse_features(s: str) -> list[str]:
             strings.append(decoded_s)
     return strings
 
+def are_equal(artist: str, feature: str):
+    '''Handle bullshit like this: A: KRESTALL / Courier,  (Mitro) & Yumagucci | F: KRESTALL / Courier / Митро (Mitro) & Yumagucci'''
+    # for now, just use feature
+    artist = to_ascii(artist).replace(" and ", "").replace(" ", "").replace(",", "").replace("&", "").replace("/", "")
+    feature = to_ascii(feature).replace(" and ", "").replace(" ", "").replace("&", "").replace("/", "")
+    if artist == feature:
+        return True
+    return False
+
+    # still doesn't catch typos e.g. A: TrillTrill | F: TrilTrill
+    # just leave these, since don't know which one to use
+
+
 def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     '''
     Format of types of string to be processed:  (dima bamberg),"{""дима бамберг (dima bamberg)""}"
@@ -137,51 +151,39 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     Also things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}, the feature is discarded
     '''      
     if artist in custom_list:
-        return features[0]
+        feature = features[0]
+        features.remove(feature)
+        return feature
     
+    # prevents artist being "featured" on their own song recorded as an actual feature
+    # e.g. Cam'ron, {"Cam\\'ron"} gets processed to Cam'ron, [Cam'ron], so this should count as solo
+
     if len(features) == 1:
         feature = features[0]
         if feature == artist:
             features.remove(feature)
             return feature
 
-    for feature in features:
-        if artist == feature.encode("ascii", "ignore").decode():
-            features.remove(feature)
-            return feature
-        if " /" in feature:
-            if artist == feature.replace(" /", ",").replace(u"\u200b", ""):
-                features.remove(feature)
-                return artist
-        if " / " in feature:
-            if artist == feature.replace(" / ", ",").replace(u"\u200b", ""):
-                features.remove(feature)
-                return artist
-        if u"\u00a0" in feature:
-            if artist == feature.replace(u"\u00a0", " "):
-                features.remove(feature)
-                return artist
-        if artist == feature.replace(u"\u200b", ""):
-            features.remove(feature)
-            return artist
-        
-        
+    removal = []
 
-    if "(" in artist and ")" in artist:
-        for feature in features:
-            if "(" not in feature or ")" not in feature: # check so artist_inside doesnt fail
-                continue
+    for i, feature in enumerate(features):
+        feature = feature.replace(u"\u00a0", " ").replace(u"\u200b", "").replace("\\\\\\\\", "\\")
+        features[i] = feature
 
-            feature_inside = (feature.split("("))[1].split(")")[0]
-            artist_inside = (artist.split("("))[1].split(")")[0]
+        if feature.replace(" /", ",").replace(" / ", ",") == artist:
+            # for things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}, the feature is discarded
+            removal.append(feature)
+        elif are_equal(artist, feature):
+            artist = feature
+            removal.append(feature)
+        else:
+            if SequenceMatcher(None, feature, artist).ratio() > 0.85:
+                # detects typos
+                removal.append(feature)
 
-            if artist_inside == "" or artist_inside.isspace(): # handle: "artist name ... ()" format
-                features.remove(feature)
-                return feature
-
-            if SequenceMatcher(None, feature_inside, artist_inside).ratio() > 0.7:
-                features.remove(feature)
-                return feature
+    for r in removal:
+        features.remove(r)
+    
 
     return artist
 

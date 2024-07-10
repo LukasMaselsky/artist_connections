@@ -9,9 +9,7 @@ import matplotlib as mpl
 
 #* run with 'python -m artist_connections.extras.network'
 
-def to_ascii(str: str):
-    return str.encode("ascii", "ignore").decode()
-    
+
 @timing(show_arg_vals=False)
 def create_singular_graph(edges_json: Artists, query: str, extended=True) -> Edges:
     '''
