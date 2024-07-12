@@ -1,8 +1,8 @@
 from artist_connections.datatypes.datatypes import Edges, Artists
 from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing, search
-import networkx as nx
+#import networkx as nx
 import matplotlib.pyplot as plt
-from pyvis.network import Network
+#from pyvis.network import Network
 import igraph as ig
 import matplotlib as mpl
 

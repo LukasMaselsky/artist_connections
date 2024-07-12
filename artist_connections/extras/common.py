@@ -1,9 +1,5 @@
 from artist_connections.datatypes.datatypes import Songs
 from artist_connections.helpers.helpers import int_input, load_json, timing
-import matplotlib.pyplot as plt
-import seaborn as sns
-import polars as pl
-import itertools
 import matplotlib as mpl
 
 

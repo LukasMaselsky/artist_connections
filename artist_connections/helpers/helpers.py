@@ -119,7 +119,7 @@ def parse_features(s: str) -> list[str]:
     strings = []
     if s.startswith('{') and s.endswith('}'):
         s = s[1:-1]
-        for item in s.split(","):
+        for item in s.split(","): # can be used since no "," present in features
             decoded_s = item
             if decoded_s.startswith('"') and decoded_s.endswith('"'):
                 decoded_s = decoded_s[1:-1]    
@@ -142,8 +142,7 @@ def are_equal(artist: str, feature: str):
     # still doesn't catch typos e.g. A: TrillTrill | F: TrilTrill
     # just leave these, since don't know which one to use
 
-
-def process(artist: str, features: list[str], custom_list: list[str]) -> str:
+def process(artist: str, features: list[str], custom_list: list[str], filter_list: list[str]) -> str:
     '''
     Format of types of string to be processed:  (dima bamberg),"{""дима бамберг (dima bamberg)""}"
     Unicode version will always be in features (I think, haven't checked all)
@@ -167,6 +166,7 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
     removal = []
 
     for i, feature in enumerate(features):
+        original_feat = feature
         feature = feature.replace(u"\u00a0", " ").replace(u"\u200b", "").replace("\\\\\\\\", "\\")
         features[i] = feature
 
@@ -177,8 +177,8 @@ def process(artist: str, features: list[str], custom_list: list[str]) -> str:
             artist = feature
             removal.append(feature)
         else:
-            if SequenceMatcher(None, feature, artist).ratio() > 0.85:
-                # detects typos
+            if SequenceMatcher(None, feature, artist).ratio() > 0.85 or should_filter(original_feat, filter_list):
+                # detects typos + filter list
                 removal.append(feature)
 
     for r in removal:

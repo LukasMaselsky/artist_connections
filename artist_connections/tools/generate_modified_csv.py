@@ -1,3 +1,4 @@
+import orjson
 import polars as pl
 from artist_connections.helpers.helpers import parse_features, timing, process, should_filter, load_json
 
@@ -28,20 +29,16 @@ def main():
         art, feats = row[1], row[2]
 
         features = parse_features(feats)
-        artist = process(art, features, custom_list)
+        artist = process(art, features, custom_list, filter_list)
 
         if should_filter(artist, filter_list):
             artist_col.append(None)
             features_col.append(None)
             continue
 
-        new_features = []
-        for feature in features:
-            if should_filter(feature, filter_list):
-                continue
-            new_features.append(feature)
         artist_col.append(artist)
-        features_col.append(str(features))
+        str_features: str = orjson.dumps(features).decode("utf-8")
+        features_col.append(str_features)
 
    
     modified = df.with_columns([pl.Series(artist_col).alias("artist"), pl.Series(features_col).alias("features")])

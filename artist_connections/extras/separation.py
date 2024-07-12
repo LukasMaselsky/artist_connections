@@ -1,5 +1,4 @@
 from collections import deque
-from re import L
 from artist_connections.datatypes.datatypes import Graph
 from artist_connections.helpers.helpers import load_json, search, styled, timing
 
