@@ -72,9 +72,9 @@ def main() -> None:
         else:
             songs[song].append(song_songs)
 
-    write_json(artists, "data/artists_2.json")
-    write_json(songs, "data/songs_2.json")
-    write_json(links, 'data/links_2.json', encoder)
+    write_json(artists, "data/artists.json")
+    write_json(songs, "data/songs.json")
+    write_json(links, 'data/links.json', encoder)
         
 
 

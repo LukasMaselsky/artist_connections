@@ -1,8 +1,6 @@
 from artist_connections.datatypes.datatypes import Edges, Artists
 from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing, search
-#import networkx as nx
 import matplotlib.pyplot as plt
-#from pyvis.network import Network
 import igraph as ig
 import matplotlib as mpl
 
@@ -89,12 +87,31 @@ def show_igraph(edges: Edges, full_graph=False, show_labels=True):
     visual_style["vertex_color"] = "skyblue"
     #sizes = [degree * 10 for degree in G.vs.degree()]
 
-    sizes = create_sizes(G.vs.degree(), 500)
+    sizes = create_sizes(G.vs.degree(), 300)
     
     visual_style["vertex_size"] = sizes
     visual_style["vertex_label_size"] = 8
-    visual_style["vertex_label_dist"] = 0.6
-    visual_style["edge_color"] = rgba_to_hex(58, 201, 255, 0.3) #? get increase alpha by weight?
+
+    dists = []
+    for size in sizes:
+        if size > 50:
+            dists.append(0) # place label INSIDE circle if it fits
+        elif size < 20:
+            dists.append(1) # if really small, move further
+        else:
+            dists.append(0.6)
+
+    visual_style["vertex_label_dist"] = dists
+
+    edge_colors = []
+    base_alpha = 0.3
+    for weight in G.es["weight"]:
+        alpha = base_alpha + (0.05 * (weight - 1))
+        alpha = alpha if alpha <= 1 else 1
+
+        edge_colors.append(rgba_to_hex(58, 201, 255, alpha))
+
+    visual_style["edge_color"] = edge_colors
     visual_style["edge_width"] = G.es["weight"]
     arrow_size = [weight * 3 for weight in G.es["weight"]]
     visual_style["edge_arrow_size"], visual_style["edge_arrow_width"] = arrow_size, arrow_size
@@ -105,22 +122,6 @@ def show_igraph(edges: Edges, full_graph=False, show_labels=True):
     ig.plot(G, layout=layout, target=ax, bbox=bbox, **visual_style)
     plt.show()
 
-'''
-def show_graph(edges: Edges) -> None:
-    G = nx.DiGraph()
-    G.add_weighted_edges_from(edges)
-    pos = nx.spring_layout(G, k=2)
-
-    node_degrees = {}
-    if not isinstance(G.degree, int):
-        node_degrees = dict(G.degree)
-    nx.draw_networkx(G, with_labels=True, node_color="skyblue", pos=pos)
-    nx.set_node_attributes(G, node_degrees, "size")
-
-    net = Network(width="100%", height="800px", bgcolor="black", directed=True, font_color="white", neighborhood_highlight=True) # type: ignore
-    net.from_nx(G)
-    net.show("graph.html", notebook=False)
-'''
     
 def main():
     mpl.rcParams['font.sans-serif'] = "Arial Unicode MS"

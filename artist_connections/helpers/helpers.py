@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from difflib import SequenceMatcher, get_close_matches
 from artist_connections.datatypes.datatypes import Artists
+import numpy as np
+import numpy.typing as npt
 
 colors = {"black": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "purple": 35, "cyan": 36, "white": 37}
 styles = {"none": 0, "bold": 1, "underline": 2}
@@ -103,11 +105,13 @@ def to_ascii(str: str):
     return str.encode("ascii", "ignore").decode()
 
 def custom_filter(s: str) -> bool:
-    '''For all the bullshit ones, casts of tv shows/musicals etc that can't be detected by program rules'''    
+    '''For all the bullshit ones, casts of tv shows/musicals/courts etc that can't be detected by program rules'''    
 
-    #* get rid of broadway/musical/tv show casts
-    if "cast of" in s.lower():
-        return True
+    custom = ["cast of", "supreme court", "district court", "court of appeal", "us department", "supreme judicial court", "court of civil", "university office"]
+
+    for c in custom:
+        if c in s.lower():
+            return True
     
     return False
 
@@ -142,13 +146,20 @@ def are_equal(artist: str, feature: str):
     # still doesn't catch typos e.g. A: TrillTrill | F: TrilTrill
     # just leave these, since don't know which one to use
 
-def process(artist: str, features: list[str], custom_list: list[str], filter_list: list[str]) -> str:
+def should_filter(s: str, filter_list: set[str]) -> bool:   
+    if s in filter_list:
+        return True
+    if custom_filter(s):
+        return True
+    return False
+
+def process(artist: str, features: list[str], custom_list: set[str], filter_list: set[str], all_artists: set[str]) -> str:
     '''
     Format of types of string to be processed:  (dima bamberg),"{""дима бамберг (dima bamberg)""}"
     Unicode version will always be in features (I think, haven't checked all)
     If this format found, always store feature as the artist name, ascii version should be discarded
     Also things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}, the feature is discarded
-    '''      
+    '''
     if artist in custom_list:
         feature = features[0]
         features.remove(feature)
@@ -170,12 +181,22 @@ def process(artist: str, features: list[str], custom_list: list[str], filter_lis
         feature = feature.replace(u"\u00a0", " ").replace(u"\u200b", "").replace("\\\\\\\\", "\\")
         features[i] = feature
 
-        if feature.replace(" /", ",").replace(" / ", ",") == artist:
+                
+        if feature.replace(" /", ",").replace(" / ", ",").replace("/", ",") == artist:
             # for things like "Earth, Wind & Fire": {"Earth / Wind & Fire"}, the feature is discarded
             removal.append(feature)
         elif are_equal(artist, feature):
             artist = feature
             removal.append(feature)
+        elif "/" in feature:
+            f = feature.replace(" /", ",").replace(" / ", ",").replace("/", ",")
+            if f in all_artists:
+                # means something like "Mac Miller": {"Tyler / The Creator"} and feature found in whole artists
+                removal.append(feature)
+                
+                if not should_filter(f, filter_list):
+                    features.append(f)
+        
         else:
             if SequenceMatcher(None, feature, artist).ratio() > 0.85 or should_filter(original_feat, filter_list):
                 # detects typos + filter list
@@ -186,13 +207,6 @@ def process(artist: str, features: list[str], custom_list: list[str], filter_lis
     
 
     return artist
-
-def should_filter(s: str, filter_list: list[str]) -> bool:   
-    if s in filter_list:
-        return True
-    if custom_filter(s):
-        return True
-    return False
 
 def print_options(options: list[str]):
     for i, option in enumerate(options):

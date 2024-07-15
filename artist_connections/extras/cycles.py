@@ -14,15 +14,15 @@ def get_cycle(start: str, cons: set[str], graph: Graph) -> None | list[str]:
 
     prev = start
     lcons = list(cons)
-    next = lcons[0]
+    nxt = lcons[0]
     end = lcons[1]
 
     #check if end artist also exists in filtered graph
-    if end not in graph or next not in graph:
+    if end not in graph or nxt not in graph:
         return None
 
     while True:
-        cur = next
+        cur = nxt
         if cur not in graph:
             # next node was one that was filtered out
             cycle = None
@@ -30,16 +30,16 @@ def get_cycle(start: str, cons: set[str], graph: Graph) -> None | list[str]:
 
         new_cons = list(graph[cur])
         con1, con2 = new_cons[0], new_cons[1]
-        next = con1 if con1 != prev else con2 
+        nxt = con1 if con1 != prev else con2 
         prev = cur
 
-        if next in cycle:
+        if nxt in cycle:
             # cycle failed, becomes a web
             cycle = None
             break
 
         cycle.append(cur)
-        if next == end:
+        if nxt == end:
             cycle.append(end)
             break
 
