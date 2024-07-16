@@ -22,14 +22,6 @@ def show_scatter_plot(edges_json: Artists, limit: int, label_limit: int, dark: b
                 f"Solo vs feature songs for top {limit} artists with most songs", 
                 font_colour, bg_colour, label_limit)
 
-    '''
-    m = []
-    for row in df.iter_rows():
-        if row[3] == "misc":
-            m.append(row[0])
-    write_json(m, "data/l.json")
-    '''
-
     plt.show()
 
 def main():

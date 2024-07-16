@@ -45,7 +45,6 @@ def main():
         str_features: str = orjson.dumps(features).decode("utf-8")
         features_col.append(str_features)
 
-   
     modified = df.with_columns([pl.Series(artist_col).alias("artist"), pl.Series(features_col).alias("features")])
     filtered = modified.drop_nulls(["artist", "features"]).filter(pl.col("tag") != "misc")
    

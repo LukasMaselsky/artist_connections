@@ -1,5 +1,5 @@
 from artist_connections.datatypes.datatypes import Edges, Artists
-from artist_connections.helpers.helpers import load_json, rgba_to_hex, timing, search
+from artist_connections.helpers.helpers import escape_dollar_signs, load_json, rgba_to_hex, timing, search
 import matplotlib.pyplot as plt
 import igraph as ig
 import matplotlib as mpl
@@ -71,7 +71,7 @@ def create_sizes(degrees: list[int], limit) -> list[int]:
     return [degree * multiplier for degree in degrees]
 
 @timing(show_arg_vals=False)
-def show_igraph(edges: Edges, full_graph=False, show_labels=True):
+def show_igraph(edges: Edges, full_graph:bool = False, show_labels: bool = True, show_arrows: bool = True):
     G = ig.Graph()
     G = G.TupleList(edges, directed=True, weights=True)
     fig, ax = plt.subplots()
@@ -82,7 +82,7 @@ def show_igraph(edges: Edges, full_graph=False, show_labels=True):
 
     visual_style = {}
     if show_labels:
-        visual_style["vertex_label"] = G.vs["name"]
+        visual_style["vertex_label"] = [escape_dollar_signs(l) for l in G.vs["name"]]
         visual_style["vertex_label_color"] = "white"
     visual_style["vertex_color"] = "skyblue"
     #sizes = [degree * 10 for degree in G.vs.degree()]
@@ -113,7 +113,7 @@ def show_igraph(edges: Edges, full_graph=False, show_labels=True):
 
     visual_style["edge_color"] = edge_colors
     visual_style["edge_width"] = G.es["weight"]
-    arrow_size = [weight * 3 for weight in G.es["weight"]]
+    arrow_size = [weight * 3 for weight in G.es["weight"]] if show_arrows else 0
     visual_style["edge_arrow_size"], visual_style["edge_arrow_width"] = arrow_size, arrow_size
 
     layout = G.layout("kamada_kawai" if not full_graph else "lgl")
@@ -135,7 +135,7 @@ def main():
     graph = create_singular_graph(artists, query)
     #graph = create_full_graph(artists)
    
-    show_igraph(graph)
+    show_igraph(graph, show_arrows=False)
     
 if __name__ == "__main__":
     main()

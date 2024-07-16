@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from difflib import SequenceMatcher, get_close_matches
 from artist_connections.datatypes.datatypes import Artists
-import numpy as np
-import numpy.typing as npt
+import csv
 
 colors = {"black": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "purple": 35, "cyan": 36, "white": 37}
 styles = {"none": 0, "bold": 1, "underline": 2}
@@ -22,6 +21,12 @@ def styled(text: str, color: Colors = "white", style: Styles = "none") -> str:
 def encoder(obj):
     if isinstance(obj, set):
         return list(obj)
+
+def escape_dollar_signs(s: str) -> str:
+    '''Needed for matplotlib graph labels since $$ interpeted as math text, gives error'''
+    if s.count("$") == 2:
+        return s.replace("$", "\\$")
+    return s
 
 def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour: str, bg_colour: str, label_limit: int):
     fig, ax = plt.subplots()
@@ -39,10 +44,10 @@ def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour
 
     # add point labels
     for i, row in enumerate(df.iter_rows()):
-        g.text(row[1], row[2] + 15, row[0], horizontalalignment='center', size='small', color='black', weight='medium')
+        text = escape_dollar_signs(row[0])
+        g.text(row[1], row[2] + 15, text, horizontalalignment='center', size='small', color='black', weight='medium')
         if i >= label_limit - 1:
             break
-
 
 def timing(func=None, show_arg_vals=True):
     #? if used with @timing, then func is a callable and it calls the _decorator with func as arg
