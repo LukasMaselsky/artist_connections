@@ -39,16 +39,6 @@ def main():
 
     show_scatter_plot(sorted_edges, limit=scatter, label_limit=scatter_labels)
     
-    '''
-    count = 0
-    for k, v in sorted_edges.items():
-        if v["solo_songs"] < 1 and v["feat_songs"] > 10:
-            count += 1
-            print(k, v["feat_songs"], v["solo_songs"])
-        if count > 50:
-            break
-    print(count)
-    '''
     
 if __name__ == "__main__":
     main()

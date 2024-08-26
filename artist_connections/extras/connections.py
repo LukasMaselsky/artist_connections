@@ -58,7 +58,7 @@ def show_connections_graph(connections: Connections, limit: int, dark: bool = Fa
         x="connections", y="artist", hue="direction",
         errorbar="sd", palette=[colour1, colour2], height=6
     )
-    g.set_axis_labels("Number of connections", "Artist")
+    g.set_axis_labels("Number of connections", "Artist", fontsize=14)
     g.figure.suptitle("Artists with the most feature connections", fontsize=16, color=font_colour)
     g.tick_params(axis='x', colors=font_colour)
     g.tick_params(axis='y', colors=font_colour)
@@ -113,7 +113,7 @@ def main():
     scatter_labels = int_input("Labels: ", scatter)
 
     show_connections_graph(connections, bar)
-    show_connections_scatter_plot(connections, limit=scatter, label_limit=scatter_labels)
+    #show_connections_scatter_plot(connections, limit=scatter, label_limit=scatter_labels)
     
     
 

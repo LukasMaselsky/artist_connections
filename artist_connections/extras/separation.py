@@ -126,7 +126,7 @@ def separation_game(links: Graph):
 
     while True:
         artist1 = search(links, "Artist 1: ")
-        artist2 = search(links, "Artist 1: ")
+        artist2 = search(links, "Artist 2: ")
 
         path = bbfs(links, artist1, artist2)
         if path is None: 
@@ -146,8 +146,10 @@ def main():
     links = filter_isolated(links) #* this gets it down from ~840 000 -> ~457 000
 
     separation_game(links)
-    return
-    subgraph = get_subgraph(links, 1000)
+    
+    x = 500
+    print(f"Here is the largest separation between the top {x} most connected artists: ")
+    subgraph = get_subgraph(links, x)
     print_path(longest_ever_path(subgraph))
 
 if __name__ == "__main__":

@@ -35,8 +35,8 @@ def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour
     g = sns.scatterplot(data=df, x=x, y=y, hue=hue, ax=ax, edgecolor=None)
     g.set(facecolor=bg_colour)
     ax.set_facecolor(bg_colour)
-    ax.set_xlabel(x, color=font_colour)
-    ax.set_ylabel(y, color=font_colour)
+    ax.set_xlabel(x, color=font_colour, fontsize=14)
+    ax.set_ylabel(y, color=font_colour, fontsize=14)
     ax.tick_params(axis='x', colors=font_colour)
     ax.tick_params(axis='y', colors=font_colour)
     for spine in ax.spines.values():
@@ -44,10 +44,10 @@ def scatter_plot(df: DataFrame, x: str, y:str, hue: str, title: str, font_colour
 
     # add point labels
     for i, row in enumerate(df.iter_rows()):
+        if i >= label_limit:
+            break
         text = escape_dollar_signs(row[0])
         g.text(row[1], row[2] + 15, text, horizontalalignment='center', size='small', color='black', weight='medium')
-        if i >= label_limit - 1:
-            break
 
 def timing(func=None, show_arg_vals=True):
     #? if used with @timing, then func is a callable and it calls the _decorator with func as arg

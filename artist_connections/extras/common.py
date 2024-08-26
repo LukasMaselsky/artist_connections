@@ -25,6 +25,8 @@ def main():
     for k, v in subset_songs.items():
         print(k, len(v))
 
+# TODO: create bar graph of this
+
 if __name__ == "__main__":
     main()
    
